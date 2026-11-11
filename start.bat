@@ -95,7 +95,10 @@ set "PHP=%PHP_DIR%\php.exe"
 call :check_php "%PHP%" || (set "ERR=PHP at %PHP% is not usable. Delete the .tools folder and run start.bat again." & goto :fail)
 
 :php_ok
-for /f "delims=" %%V in ('""%PHP%" -r "echo PHP_VERSION;""') do echo       Using PHP %%V  ^(%PHP%^)
+rem No "for /f" around the PHP path: a ")" in the folder name, as in
+rem "mat (1)", would end the for-loop early.
+"%PHP%" -r "echo '      Using PHP ', PHP_VERSION, PHP_EOL;"
+echo       at %PHP%
 
 rem ----------------------------------------------------------- 2. Composer --
 echo [2/5] Checking PHP packages...
@@ -132,7 +135,8 @@ if /i "%MODE%"=="reset" (
 rem -------------------------------------------------------------- 4. Port --
 echo [4/5] Finding a free port...
 set "PORT="
-for /f "delims=" %%N in ('""%PHP%" scripts\local\setup.php free-port %MAT_PORT%"') do set "PORT=%%N"
+"%PHP%" scripts\local\setup.php free-port %MAT_PORT% > "%TOOLS%\port.txt"
+if not errorlevel 1 set /p PORT=<"%TOOLS%\port.txt"
 if not defined PORT (set "ERR=No free port found near %MAT_PORT%." & goto :fail)
 if not "%PORT%"=="%MAT_PORT%" echo       Port %MAT_PORT% is busy, using %PORT% instead.
 set "APP_URL=http://127.0.0.1:%PORT%"

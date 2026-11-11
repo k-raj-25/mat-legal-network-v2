@@ -39,12 +39,13 @@ jobs:
           if ($bat -notmatch "`r`n") { throw 'start.bat was checked out without CRLF line endings' }
 
           function Start-Launcher([string]$name, [string]$arg = '') {
-            Start-Process -FilePath cmd.exe -WorkingDirectory $dir -WindowStyle Hidden `
+            $script:proc = Start-Process -FilePath cmd.exe -WorkingDirectory $dir -WindowStyle Hidden -PassThru `
               -ArgumentList '/c', "start.bat $arg > $name.log 2>&1"
           }
           function Wait-Site([int]$port, [string]$name) {
-            for ($i = 0; $i -lt 360; $i++) {
+            for ($i = 0; $i -lt 300; $i++) {
               try { $r = Invoke-WebRequest "http://127.0.0.1:$port/" -UseBasicParsing -TimeoutSec 5; if ($r.StatusCode -eq 200) { return } } catch {}
+              if ($script:proc.HasExited) { Get-Content "$dir\$name.log"; throw "start.bat exited (code $($script:proc.ExitCode)) before the site came up" }
               Start-Sleep -Seconds 2
             }
             Get-Content "$dir\$name.log"
