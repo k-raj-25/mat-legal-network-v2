@@ -1,82 +1,104 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/inter';
-@import '@fontsource-variable/source-serif-4';
+@import '@fontsource-variable/plus-jakarta-sans';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../views';
 
 @theme {
-    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
-    --font-serif: 'Source Serif 4 Variable', ui-serif, Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-display: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
 
-    /* Brand: deep navy (trust) + muted gold (legal tradition). Light theme by default. */
-    --color-brand-50: #f2f6fb;
-    --color-brand-100: #e1eaf5;
-    --color-brand-200: #c3d4ea;
-    --color-brand-300: #93b2d8;
-    --color-brand-400: #5d88bf;
-    --color-brand-500: #3b67a3;
-    --color-brand-600: #2b5089;
-    --color-brand-700: #234070;
-    --color-brand-800: #1c335a;
-    --color-brand-900: #142540;
-    --color-brand-950: #0c1729;
+    /* Bold & vibrant: electric teal (primary) + coral (accent) + ink.
+       600 shades are tuned for >= 4.5:1 contrast with white text. */
+    --color-brand-50: #ecfdf8;
+    --color-brand-100: #d1faef;
+    --color-brand-200: #a5f3dd;
+    --color-brand-300: #6ee7c8;
+    --color-brand-400: #2dd4b0;
+    --color-brand-500: #14b8a0;
+    --color-brand-600: #0a7f78;
+    --color-brand-700: #0b6b66;
+    --color-brand-800: #0d5552;
+    --color-brand-900: #0e4644;
+    --color-brand-950: #042f2e;
 
-    --color-gold-50: #fbf7ee;
-    --color-gold-100: #f4ead0;
-    --color-gold-200: #e8d39e;
-    --color-gold-300: #dbb96b;
-    --color-gold-400: #cfa246;
-    --color-gold-500: #b8862e;
-    --color-gold-600: #9a6b24;
-    --color-gold-700: #7a5220;
-}
+    --color-coral-50: #fff4f1;
+    --color-coral-100: #ffe4de;
+    --color-coral-200: #ffc9bd;
+    --color-coral-300: #ffa594;
+    --color-coral-400: #ff7a64;
+    --color-coral-500: #ff5a45;
+    --color-coral-600: #d93a26;
+    --color-coral-700: #b32d1c;
 
-@layer base {
-    html { color-scheme: light; -webkit-tap-highlight-color: transparent; }
-    body { @apply bg-white text-slate-800 antialiased; }
-    h1, h2, h3, .font-display { font-family: var(--font-serif); letter-spacing: -0.01em; }
-    [x-cloak] { display: none !important; }
-    :focus-visible { @apply outline-2 outline-offset-2 outline-brand-500; }
+    --color-ink: #0b1324;
+    --color-ink-soft: #1a2540;
+
+    --shadow-pop: 0 1px 0 0 rgb(11 19 36 / 0.04), 0 12px 32px -12px rgb(11 19 36 / 0.18);
+    --shadow-pop-lg: 0 2px 0 0 rgb(11 19 36 / 0.04), 0 24px 60px -20px rgb(11 19 36 / 0.28);
+
+    --animate-float: float 7s ease-in-out infinite;
+    --animate-rise: rise 0.6s cubic-bezier(.2,.7,.2,1) both;
+
+    @keyframes float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 }
 
 @utility btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold tracking-[-0.01em] transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+@layer base {
+    html { color-scheme: light; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+    body { @apply bg-white text-slate-700 antialiased; font-feature-settings: 'ss01', 'cv11'; }
+    h1, h2, h3, .font-display { @apply font-display font-extrabold tracking-[-0.03em] text-ink; }
+    [x-cloak] { display: none !important; }
+    :focus-visible { @apply outline-2 outline-offset-2 outline-brand-500; }
+    ::selection { @apply bg-coral-200 text-ink; }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    }
 }
 
 @layer components {
     .container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
 
-    .btn-primary { @apply btn bg-brand-800 text-white shadow-sm hover:bg-brand-700; }
-    .btn-gold { @apply btn bg-gold-500 text-white shadow-sm hover:bg-gold-600; }
-    .btn-whatsapp { @apply btn bg-[#1f9d55] text-white shadow-sm hover:bg-[#17834a]; }
-    .btn-outline { @apply btn border border-slate-300 bg-white text-slate-800 hover:border-brand-300 hover:bg-brand-50; }
+    .btn-primary { @apply btn bg-brand-600 text-white shadow-[0_8px_20px_-8px_rgb(10_127_120/0.6)] hover:-translate-y-0.5 hover:bg-brand-700; }
+    .btn-accent { @apply btn bg-coral-600 text-white shadow-[0_8px_20px_-8px_rgb(217_58_38/0.6)] hover:-translate-y-0.5 hover:bg-coral-700; }
+    .btn-ink { @apply btn bg-ink text-white hover:-translate-y-0.5 hover:bg-ink-soft; }
+    .btn-whatsapp { @apply btn bg-[#128c4a] text-white shadow-[0_8px_20px_-8px_rgb(18_140_74/0.6)] hover:-translate-y-0.5 hover:bg-[#0f7a40]; }
+    .btn-outline { @apply btn border-2 border-slate-200 bg-white text-ink hover:border-ink; }
     .btn-ghost { @apply btn text-slate-700 hover:bg-slate-100; }
     .btn-danger { @apply btn bg-rose-600 text-white hover:bg-rose-700; }
-    .btn-sm { @apply px-3 py-1.5 text-xs; }
+    .btn-sm { @apply px-3.5 py-1.5 text-xs; }
 
-    .form-label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
-    .form-input { @apply block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-xs placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none; }
-    .form-input[aria-invalid='true'] { @apply border-rose-400 focus:border-rose-500 focus:ring-rose-500/20; }
-    .form-help { @apply mt-1 text-xs text-slate-500; }
-    .form-error { @apply mt-1 text-xs font-medium text-rose-600; }
-    .form-check { @apply size-4 rounded border-slate-300 text-brand-700 accent-brand-700; }
+    .form-label { @apply mb-1.5 block text-sm font-semibold text-ink; }
+    .form-input { @apply block w-full rounded-xl border-2 border-slate-200 bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-slate-400 transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none; }
+    .form-input[aria-invalid='true'] { @apply border-rose-400 focus:border-rose-500 focus:ring-rose-500/15; }
+    .form-help { @apply mt-1.5 text-xs text-slate-500; }
+    .form-error { @apply mt-1.5 text-xs font-semibold text-rose-600; }
+    .form-check { @apply size-[18px] rounded-md border-slate-300 accent-brand-600; }
 
-    .card { @apply rounded-2xl border border-slate-200 bg-white shadow-xs; }
-    .chip { @apply inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-800 ring-1 ring-brand-100 ring-inset; }
-    .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset; }
+    .card { @apply rounded-3xl border border-slate-200/80 bg-white shadow-pop; }
+    .chip { @apply inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700; }
+    .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset; }
+    .eyebrow { @apply inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-ink shadow-pop ring-1 ring-slate-200/70; }
+    .tile { @apply inline-flex shrink-0 items-center justify-center rounded-2xl; }
+    .highlight { background: linear-gradient(transparent 62%, var(--color-coral-200) 62%, var(--color-coral-200) 92%, transparent 92%); }
+    .dot-grid { background-image: radial-gradient(rgb(11 19 36 / 0.09) 1.2px, transparent 1.2px); background-size: 22px 22px; }
 
     .prose-legal { @apply max-w-none text-[15px] leading-7 text-slate-700; }
-    .prose-legal h2 { @apply mt-10 mb-3 text-xl font-semibold text-slate-900; }
-    .prose-legal h3 { @apply mt-6 mb-2 text-base font-semibold text-slate-900 font-sans; }
+    .prose-legal h2 { @apply mt-10 mb-3 text-xl; }
+    .prose-legal h3 { @apply mt-6 mb-2 text-base; }
     .prose-legal p { @apply my-3; }
-    .prose-legal ul { @apply my-3 list-disc space-y-1.5 pl-6; }
-    .prose-legal ol { @apply my-3 list-decimal space-y-1.5 pl-6; }
-    .prose-legal a { @apply font-medium text-brand-700 underline underline-offset-2; }
-    .prose-legal strong { @apply text-slate-900; }
+    .prose-legal ul { @apply my-3 list-disc space-y-1.5 pl-6 marker:text-brand-500; }
+    .prose-legal ol { @apply my-3 list-decimal space-y-1.5 pl-6 marker:font-bold marker:text-brand-600; }
+    .prose-legal a { @apply font-semibold text-brand-700 underline decoration-brand-300 decoration-2 underline-offset-2 hover:decoration-brand-600; }
+    .prose-legal strong { @apply text-ink; }
 
-    .admin-table { @apply min-w-full divide-y divide-slate-200 text-sm; }
-    .admin-table th { @apply bg-slate-50 px-4 py-3 text-left text-xs font-semibold tracking-wide text-slate-500 uppercase; }
-    .admin-table td { @apply px-4 py-3 align-top; }
+    .admin-table { @apply min-w-full divide-y divide-slate-100 text-sm; }
+    .admin-table th { @apply bg-slate-50/80 px-4 py-3 text-left text-[11px] font-bold tracking-wider text-slate-500 uppercase; }
+    .admin-table td { @apply px-4 py-3.5 align-top; }
+    .admin-table tbody tr { @apply transition hover:bg-brand-50/40; }
 }

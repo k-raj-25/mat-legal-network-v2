@@ -3,7 +3,7 @@
     <div class="grid gap-6 xl:grid-cols-3">
         @foreach ($lists as $type => $list)
             <section class="card flex flex-col">
-                <h2 class="border-b border-slate-200 px-5 py-4 font-sans font-semibold">{{ $list['label'] }} <span class="text-sm font-normal text-slate-500">({{ $list['items']->count() }})</span></h2>
+                <h2 class="border-b border-slate-200 px-5 py-4 text-lg">{{ $list['label'] }} <span class="text-sm font-normal text-slate-500">({{ $list['items']->count() }})</span></h2>
                 <form method="POST" action="{{ route('admin.masters.store', $type) }}" class="flex gap-2 border-b border-slate-100 p-4">
                     @csrf
                     <input name="name" required maxlength="100" placeholder="Add new…" class="form-input py-2" aria-label="New {{ strtolower($list['label']) }} name">
@@ -22,7 +22,7 @@
     </div>
 
     <section class="card mt-6 p-5">
-        <h2 class="font-sans font-semibold">Cities</h2>
+        <h2 class="text-lg">Cities</h2>
         <div class="mt-4 grid gap-6 lg:grid-cols-[320px_1fr]">
             <div>
                 <form method="GET" class="flex gap-2">

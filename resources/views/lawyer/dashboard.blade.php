@@ -1,16 +1,17 @@
 @php use App\Enums\LawyerStatus; @endphp
 <x-layouts.lawyer title="Dashboard">
     @if (session('registered'))
-        <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900" role="status">
-            <p class="font-semibold">Registration submitted 🎉</p>
-            <p class="mt-1 text-sm">Thank you for joining MAT LEGAL NETWORK. Our team will verify your details – usually within 2 working days – and email you once your profile is live.</p>
+        <div class="relative mb-6 overflow-hidden rounded-[28px] bg-gradient-to-br from-brand-500 to-brand-700 p-6 text-white" role="status">
+            <div class="pointer-events-none absolute -right-10 -bottom-16 size-48 rounded-full bg-white/10"></div>
+            <p class="font-display text-2xl font-extrabold">Registration submitted 🎉</p>
+            <p class="mt-1 max-w-2xl text-brand-50">Thank you for joining MAT LEGAL NETWORK. Our team will verify your details – usually within 2 working days – and email you once your profile is live.</p>
         </div>
     @endif
 
     <div class="grid gap-6 lg:grid-cols-3">
-        <section class="card p-6 lg:col-span-2" data-testid="status-card">
+        <section class="card p-6 sm:p-7 lg:col-span-2" data-testid="status-card">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="font-sans text-lg font-semibold text-slate-900">Profile status</h2>
+                <h2 class="flex items-center gap-3 text-xl"><span class="tile size-10 bg-brand-100 text-brand-700"><x-icon name="shield" class="size-5"/></span> Profile status</h2>
                 <x-status-badge :status="$lawyer->status" data-testid="status-badge"/>
             </div>
             @switch($lawyer->status)
@@ -36,23 +37,23 @@
                     </div>
                     @break
             @endswitch
-            <dl class="mt-6 grid gap-4 border-t border-slate-100 pt-5 text-sm sm:grid-cols-3">
-                <div><dt class="text-slate-500">Profile ID</dt><dd class="mt-0.5 font-mono font-semibold text-slate-900">{{ $lawyer->public_code }}</dd></div>
-                <div><dt class="text-slate-500">Submitted</dt><dd class="mt-0.5 font-medium text-slate-900">{{ $lawyer->submitted_at?->format('d M Y') }}</dd></div>
-                <div><dt class="text-slate-500">Profile views</dt><dd class="mt-0.5 font-medium text-slate-900">{{ number_format($lawyer->profile_views) }}</dd></div>
+            <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-3">
+                <div class="rounded-2xl bg-slate-50 p-4"><dt class="text-[11px] font-bold tracking-wide text-slate-400 uppercase">Profile ID</dt><dd class="mt-0.5 font-mono font-semibold text-slate-900">{{ $lawyer->public_code }}</dd></div>
+                <div class="rounded-2xl bg-slate-50 p-4"><dt class="text-[11px] font-bold tracking-wide text-slate-400 uppercase">Submitted</dt><dd class="mt-0.5 font-medium text-slate-900">{{ $lawyer->submitted_at?->format('d M Y') }}</dd></div>
+                <div class="rounded-2xl bg-slate-50 p-4"><dt class="text-[11px] font-bold tracking-wide text-slate-400 uppercase">Profile views</dt><dd class="mt-0.5 font-medium text-slate-900">{{ number_format($lawyer->profile_views) }}</dd></div>
             </dl>
         </section>
 
-        <section class="card p-6">
-            <h2 class="font-sans text-lg font-semibold text-slate-900">Profile strength</h2>
+        <section class="card p-6 sm:p-7">
+            <h2 class="flex items-center gap-3 text-xl"><span class="tile size-10 bg-coral-100 text-coral-700"><x-icon name="bolt" class="size-5"/></span> Profile strength</h2>
             <div class="mt-4 flex items-center gap-3">
-                <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-gold-500" style="width: {{ $completeness }}%"></div></div>
-                <span class="text-sm font-semibold text-slate-900">{{ $completeness }}%</span>
+                <div class="h-3 flex-1 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-brand-500 to-coral-500" style="width: {{ $completeness }}%"></div></div>
+                <span class="font-display text-2xl font-extrabold text-ink">{{ $completeness }}%</span>
             </div>
             <ul class="mt-4 space-y-2 text-sm">
                 @foreach ($checks as $label => $done)
                     <li class="flex items-center gap-2 {{ $done ? 'text-slate-500' : 'text-slate-800' }}">
-                        <x-icon :name="$done ? 'check-circle' : 'info'" class="size-4 {{ $done ? 'text-emerald-600' : 'text-gold-600' }}"/> {{ $label }}
+                        <x-icon :name="$done ? 'check-circle' : 'info'" class="size-4 {{ $done ? 'text-emerald-600' : 'text-coral-600' }}"/> {{ $label }}
                     </li>
                 @endforeach
             </ul>
@@ -60,8 +61,9 @@
         </section>
     </div>
 
-    <section class="card mt-6 p-6">
-        <h2 class="font-sans text-lg font-semibold text-slate-900">How you'll receive clients</h2>
-        <p class="mt-2 text-sm leading-6 text-slate-600">Clients never see your phone number or email. They contact MAT LEGAL NETWORK quoting your Profile ID, and our team calls you on <strong>{{ $lawyer->phone }}</strong> to pass on the request. Please keep your number up to date.</p>
+    <section class="relative mt-6 overflow-hidden rounded-[28px] bg-ink p-7 text-slate-300">
+        <div class="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full bg-coral-500/25 blur-3xl"></div>
+        <h2 class="relative text-xl text-white">How you'll receive clients</h2>
+        <p class="relative mt-2 max-w-3xl leading-7">Clients never see your phone number or email. They contact MAT LEGAL NETWORK quoting your Profile ID, and our team calls you on <strong class="text-white">{{ $lawyer->phone }}</strong> to pass on the request. Please keep your number up to date.</p>
     </section>
 </x-layouts.lawyer>

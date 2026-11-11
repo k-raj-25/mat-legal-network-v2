@@ -1,14 +1,14 @@
 <x-layouts.admin title="Enquiries">
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <nav class="flex flex-wrap gap-1 rounded-xl bg-white p-1 ring-1 ring-slate-200" aria-label="Status">
-            <a href="{{ route('admin.enquiries.index') }}" class="rounded-lg px-3 py-1.5 text-sm font-medium {{ ! $status ? 'bg-brand-800 text-white' : 'text-slate-600 hover:bg-slate-50' }}">All <span class="text-xs opacity-70">{{ $counts->sum() }}</span></a>
+        <nav class="flex flex-wrap gap-1 rounded-full bg-white p-1 shadow-pop ring-1 ring-slate-200/70" aria-label="Status">
+            <a href="{{ route('admin.enquiries.index') }}" class="rounded-full px-3.5 py-1.5 text-sm font-bold {{ ! $status ? 'bg-ink text-white' : 'text-slate-600 hover:bg-slate-50' }}">All <span class="text-xs opacity-70">{{ $counts->sum() }}</span></a>
             @foreach (\App\Enums\EnquiryStatus::cases() as $s)
-                <a href="{{ route('admin.enquiries.index', ['status' => $s->value]) }}" class="rounded-lg px-3 py-1.5 text-sm font-medium {{ $status === $s->value ? 'bg-brand-800 text-white' : 'text-slate-600 hover:bg-slate-50' }}">{{ $s->label() }} <span class="text-xs opacity-70">{{ $counts[$s->value] ?? 0 }}</span></a>
+                <a href="{{ route('admin.enquiries.index', ['status' => $s->value]) }}" class="rounded-full px-3.5 py-1.5 text-sm font-bold {{ $status === $s->value ? 'bg-ink text-white' : 'text-slate-600 hover:bg-slate-50' }}">{{ $s->label() }} <span class="text-xs opacity-70">{{ $counts[$s->value] ?? 0 }}</span></a>
             @endforeach
         </nav>
         <form method="GET" class="flex gap-2">
             @if ($status)<input type="hidden" name="status" value="{{ $status }}">@endif
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="Name, phone, email, reference" class="form-input w-64 py-2" aria-label="Search enquiries">
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="Name, phone, email, reference" class="form-input w-64 rounded-full py-2" aria-label="Search enquiries">
             <button class="btn-outline">Search</button>
         </form>
     </div>

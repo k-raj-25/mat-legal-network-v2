@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Paginator::defaultView('pagination::tailwind');
+        Paginator::defaultView('pagination.mat');
 
         if ($this->app->isProduction()) {
             URL::forceHttps();

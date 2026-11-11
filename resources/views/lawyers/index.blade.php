@@ -16,11 +16,16 @@
 @endphp
 <x-layouts.app :title="$heading" :description="'Search verified '.strtolower($heading).' on MAT LEGAL NETWORK. Compare experience, courts and languages, then connect through our helpline.'"
                :canonical="route('lawyers.index', array_filter(['area' => $f['area'], 'state' => $f['state'], 'city' => $f['city']]))" :noindex="$lawyers->isEmpty()">
-    <div class="border-b border-slate-200 bg-slate-50">
-        <div class="container-page py-8">
-            <nav class="text-xs text-slate-500" aria-label="Breadcrumb"><a href="{{ route('home') }}" class="hover:text-slate-700">Home</a> <span class="mx-1">/</span> <span class="text-slate-700">Find a lawyer</span></nav>
-            <h1 class="mt-2 text-3xl font-bold text-brand-950 sm:text-4xl" data-testid="results-heading">{{ $heading }}</h1>
-            <p class="mt-2 text-slate-600"><span data-testid="results-count">{{ number_format($lawyers->total()) }}</span> verified {{ Str::plural('lawyer', $lawyers->total()) }} found</p>
+    <div class="relative overflow-hidden">
+        <div class="pointer-events-none absolute inset-0 -z-10">
+            <div class="dot-grid absolute inset-0 [mask-image:linear-gradient(to_bottom,black,transparent)]"></div>
+            <div class="absolute -top-24 -left-24 size-80 rounded-full bg-brand-300/35 blur-3xl"></div>
+            <div class="absolute -top-24 right-0 size-80 rounded-full bg-coral-300/30 blur-3xl"></div>
+        </div>
+        <div class="container-page pt-6 pb-8 sm:pt-10">
+            <nav class="flex items-center gap-1.5 text-xs font-semibold text-slate-500" aria-label="Breadcrumb"><a href="{{ route('home') }}" class="hover:text-ink">Home</a> <x-icon name="chevron-right" class="size-3"/> <span class="text-ink">Find a lawyer</span></nav>
+            <h1 class="mt-3 text-4xl sm:text-5xl" data-testid="results-heading">{{ $heading }}</h1>
+            <p class="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-sm font-bold text-ink shadow-pop ring-1 ring-slate-200/70"><span class="size-2 rounded-full bg-brand-500"></span><span data-testid="results-count">{{ number_format($lawyers->total()) }}</span> verified {{ Str::plural('lawyer', $lawyers->total()) }} found</p>
         </div>
     </div>
 
@@ -28,16 +33,17 @@
         <div class="lg:grid lg:grid-cols-[280px_1fr] lg:gap-8">
             {{-- Filters --}}
             <aside>
-                <div class="fixed inset-0 z-50 bg-slate-900/50 lg:hidden" x-show="filtersOpen" x-cloak x-transition.opacity @click="filtersOpen = false"></div>
+                <div class="fixed inset-0 z-50 bg-ink/50 backdrop-blur-sm lg:hidden" x-show="filtersOpen" x-cloak x-transition.opacity @click="filtersOpen = false"></div>
                 <form method="GET" action="{{ route('lawyers.index') }}" id="filters" data-testid="filters" @submit="[...$el.elements].forEach(e => { if (e.name && (e.value === '' || (e.name === 'sort' && e.value === 'relevance'))) e.disabled = true })"
-                      class="fixed inset-y-0 right-0 z-50 flex w-[88%] max-w-sm flex-col bg-white shadow-2xl transition-transform lg:sticky lg:top-24 lg:z-auto lg:w-auto lg:max-w-none lg:translate-x-0 lg:bg-transparent lg:shadow-none lg:transition-none"
+                      class="fixed inset-y-0 right-0 z-50 flex w-[88%] max-w-sm flex-col rounded-l-[28px] bg-white shadow-pop-lg lg:rounded-none transition-transform lg:sticky lg:top-24 lg:z-auto lg:w-auto lg:max-w-none lg:translate-x-0 lg:bg-transparent lg:shadow-none lg:transition-none"
                       :class="filtersOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'"
                       x-data="cityPicker({ url: '{{ route('locations.cities', ':state') }}', state: @js($f['state']), city: @js($f['city']), key: 'slug', initial: @js($cities) })">
                     <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 lg:hidden">
-                        <p class="text-lg font-semibold">Filters</p>
-                        <button type="button" class="btn-ghost -mr-2" @click="filtersOpen = false" aria-label="Close filters"><x-icon name="x" class="size-5"/></button>
+                        <p class="font-display text-xl font-extrabold text-ink">Filters</p>
+                        <button type="button" class="tile size-10 bg-slate-100 text-ink" @click="filtersOpen = false" aria-label="Close filters"><x-icon name="x" class="size-5"/></button>
                     </div>
-                    <div class="flex-1 space-y-5 overflow-y-auto px-5 py-5 lg:max-h-[calc(100vh-11rem)] lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white">
+                    <div class="flex-1 space-y-5 overflow-y-auto px-5 py-5 lg:max-h-[calc(100vh-12rem)] lg:rounded-3xl lg:border lg:border-slate-200/80 lg:bg-white lg:shadow-pop">
+                        <p class="hidden items-center gap-2 font-display text-lg font-extrabold text-ink lg:flex"><span class="tile size-8 bg-brand-100 text-brand-700"><x-icon name="filter" class="size-4"/></span> Filters</p>
                         <input type="hidden" name="sort" value="{{ $f['sort'] }}">
                         <div>
                             <label for="q" class="form-label">Lawyer or firm name</label>
@@ -94,7 +100,7 @@
                                 @foreach (['' => 'Any'] + config('mat.genders') as $k => $l)
                                     <label class="cursor-pointer">
                                         <input type="radio" name="gender" value="{{ $k }}" class="peer sr-only" @checked((string) $f['gender'] === (string) $k)>
-                                        <span class="inline-block rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-700 peer-checked:border-brand-700 peer-checked:bg-brand-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500">{{ $l }}</span>
+                                        <span class="inline-block rounded-full border-2 border-slate-200 px-3.5 py-1 text-sm font-semibold text-slate-700 peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500">{{ $l }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -121,14 +127,14 @@
             <section aria-labelledby="results-heading" class="mt-6 min-w-0 lg:mt-0">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <button type="button" class="btn-outline lg:hidden" @click="filtersOpen = true" data-testid="open-filters">
-                        <x-icon name="filter" class="size-4"/> Filters @if ($activeFilterCount)<span class="rounded-full bg-brand-700 px-1.5 text-xs text-white">{{ $activeFilterCount }}</span>@endif
+                        <x-icon name="filter" class="size-4"/> Filters @if ($activeFilterCount)<span class="rounded-full bg-coral-600 px-2 text-xs text-white">{{ $activeFilterCount }}</span>@endif
                     </button>
                     <form method="GET" action="{{ route('lawyers.index') }}" class="ml-auto flex items-center gap-2">
                         @foreach (collect($base)->except('sort') as $k => $v)
                             @if (is_scalar($v))<input type="hidden" name="{{ $k }}" value="{{ $v }}">@endif
                         @endforeach
-                        <label for="sort" class="text-sm text-slate-600">Sort by</label>
-                        <select id="sort" name="sort" class="form-input w-auto py-2" onchange="this.form.submit()">
+                        <label for="sort" class="text-sm font-semibold text-slate-500">Sort</label>
+                        <select id="sort" name="sort" class="form-input w-auto rounded-full py-2 font-semibold" onchange="this.form.submit()">
                             @foreach ($sorts as $k => $l)<option value="{{ $k }}" @selected($f['sort'] === $k)>{{ $l }}</option>@endforeach
                         </select>
                         <noscript><button class="btn-outline btn-sm">Go</button></noscript>
@@ -139,7 +145,7 @@
                     <div class="mt-4 flex flex-wrap items-center gap-2" data-testid="active-filters">
                         @foreach ($chips as $key => $text)
                             @php $without = collect($base)->except(array_merge([$key], $key === 'state' ? ['city'] : []))->all(); @endphp
-                            <a href="{{ route('lawyers.index', $without) }}" class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 py-1 pr-2 pl-3 text-sm text-brand-800 ring-1 ring-brand-100 hover:bg-brand-100" aria-label="Remove filter {{ $text }}">
+                            <a href="{{ route('lawyers.index', $without) }}" class="inline-flex items-center gap-1.5 rounded-full bg-ink py-1.5 pr-2.5 pl-3.5 text-sm font-bold text-white transition hover:bg-coral-600" aria-label="Remove filter {{ $text }}">
                                 {{ $text }} <x-icon name="x" class="size-3.5"/>
                             </a>
                         @endforeach
@@ -148,9 +154,9 @@
                 @endif
 
                 @if ($lawyers->isEmpty())
-                    <div class="card mt-6 px-6 py-14 text-center" data-testid="empty-state">
-                        <span class="mx-auto inline-flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-500"><x-icon name="search" class="size-6"/></span>
-                        <h2 class="mt-4 text-xl font-semibold text-slate-900">No lawyers match these filters yet</h2>
+                    <div class="card mt-6 px-6 py-16 text-center" data-testid="empty-state">
+                        <span class="tile mx-auto size-16 -rotate-6 bg-coral-100 text-coral-600"><x-icon name="search" class="size-8"/></span>
+                        <h2 class="mt-5 text-2xl">No lawyers match these filters yet</h2>
                         <p class="mx-auto mt-2 max-w-md text-slate-600">Try removing a filter or searching a nearby city. Or call us – our team can often find the right lawyer even when they are not listed here yet.</p>
                         <div class="mt-6 flex flex-col items-center gap-3">
                             <a href="{{ route('lawyers.index') }}" class="btn-outline">Clear filters</a>
@@ -166,12 +172,12 @@
                     <div class="mt-10">{{ $lawyers->onEachSide(1)->links() }}</div>
                 @endif
 
-                <div class="mt-10 flex flex-col items-start gap-4 rounded-2xl border border-brand-100 bg-brand-50 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div class="mt-12 flex flex-col items-start gap-5 rounded-[28px] bg-gradient-to-br from-brand-500 to-brand-700 p-7 text-white sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p class="font-semibold text-brand-950">Talk to us before you decide</p>
-                        <p class="text-sm text-slate-600">Quote the lawyer's Profile ID and we'll connect you. Lawyers' personal numbers are never shown.</p>
+                        <p class="font-display text-xl font-extrabold">Talk to us before you decide</p>
+                        <p class="mt-1 text-sm text-brand-50">Quote the lawyer's Profile ID and we'll connect you. Lawyers' personal numbers are never shown.</p>
                     </div>
-                    <x-contact-buttons/>
+                    <x-contact-buttons on-dark/>
                 </div>
             </section>
         </div>

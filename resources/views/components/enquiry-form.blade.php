@@ -1,10 +1,10 @@
 @props(['lawyer' => null, 'areas', 'formToken'])
 <div id="enquiry" class="scroll-mt-28">
     @if (session('enquiry_success'))
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-900" role="status" data-testid="enquiry-success">
+        <div class="rounded-3xl bg-brand-50 p-6 text-ink ring-1 ring-brand-200" role="status" data-testid="enquiry-success">
             <div class="flex items-center gap-3">
-                <x-icon name="check-circle" class="size-7 text-emerald-600"/>
-                <h3 class="font-sans text-lg font-semibold">Request received</h3>
+                <span class="tile size-12 bg-brand-500 text-white"><x-icon name="check" class="size-6"/></span>
+                <h3 class="text-xl">Request received!</h3>
             </div>
             <p class="mt-2 text-sm leading-6">Thank you. Your reference number is <strong class="font-mono">{{ session('enquiry_success') }}</strong>. Our team will call you back shortly during {{ $site['support_hours'] }}. For anything urgent, call <a class="font-semibold underline" href="tel:{{ preg_replace('/[^\d+]/', '', $site['company_phone']) }}">{{ $site['company_phone'] }}</a>.</p>
         </div>
@@ -17,7 +17,7 @@
             <div class="absolute -left-[9999px]" aria-hidden="true"><label>Website <input type="text" name="{{ \App\Support\SpamGuard::HONEYPOT }}" tabindex="-1" autocomplete="off"></label></div>
 
             @if ($errors->any())
-                <p class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">Please check the highlighted fields.</p>
+                <p class="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800" role="alert">Please check the highlighted fields.</p>
             @endif
 
             <div class="grid gap-4 sm:grid-cols-2">
@@ -37,7 +37,7 @@
                     @foreach (['call' => 'Phone call', 'whatsapp' => 'WhatsApp', 'email' => 'Email'] as $k => $l)
                         <label class="cursor-pointer">
                             <input type="radio" name="preferred_contact" value="{{ $k }}" x-model="pref" class="peer sr-only">
-                            <span class="inline-block rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 peer-checked:border-brand-700 peer-checked:bg-brand-50 peer-checked:font-semibold peer-checked:text-brand-800 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500">{{ $l }}</span>
+                            <span class="inline-block rounded-full border-2 border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500">{{ $l }}</span>
                         </label>
                     @endforeach
                 </div>
@@ -49,7 +49,7 @@
                 <span>I agree to the <a href="{{ route('legal', 'privacy') }}" class="font-medium text-brand-700 underline" target="_blank">Privacy Policy</a>, <a href="{{ route('legal', 'terms') }}" class="font-medium text-brand-700 underline" target="_blank">Terms</a> and <a href="{{ route('legal', 'disclaimer') }}" class="font-medium text-brand-700 underline" target="_blank">Disclaimer</a>, and consent to MAT LEGAL NETWORK contacting me about this request{{ $lawyer ? ' and sharing it with the lawyer' : '' }}.</span>
             </label>
             @error('consent')<p class="form-error -mt-2">{{ $message }}</p>@enderror
-            <button class="btn-gold w-full py-3" :disabled="busy" data-testid="enquiry-submit">
+            <button class="btn-accent w-full py-3.5 text-base" :disabled="busy" data-testid="enquiry-submit">
                 <span x-show="!busy">Request a callback</span><span x-show="busy" x-cloak>Sending…</span>
             </button>
         </form>

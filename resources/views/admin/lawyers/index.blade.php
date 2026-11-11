@@ -1,16 +1,16 @@
 @php $tabs = ['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Changes requested', 'suspended' => 'Suspended', 'all' => 'All']; @endphp
 <x-layouts.admin title="Lawyers">
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <nav class="flex flex-wrap gap-1 rounded-xl bg-white p-1 ring-1 ring-slate-200" aria-label="Status">
+        <nav class="flex flex-wrap gap-1 rounded-full bg-white p-1 shadow-pop ring-1 ring-slate-200/70" aria-label="Status">
             @foreach ($tabs as $k => $l)
-                <a href="{{ route('admin.lawyers.index', ['status' => $k, 'q' => request('q')]) }}" class="rounded-lg px-3 py-1.5 text-sm font-medium {{ $status === $k ? 'bg-brand-800 text-white' : 'text-slate-600 hover:bg-slate-50' }}">
+                <a href="{{ route('admin.lawyers.index', ['status' => $k, 'q' => request('q')]) }}" class="rounded-full px-3.5 py-1.5 text-sm font-bold {{ $status === $k ? 'bg-ink text-white' : 'text-slate-600 hover:bg-slate-50' }}">
                     {{ $l }} <span class="ml-1 text-xs opacity-70">{{ $k === 'all' ? $counts->sum() : ($counts[$k] ?? 0) }}</span>
                 </a>
             @endforeach
         </nav>
         <form method="GET" class="flex gap-2">
             <input type="hidden" name="status" value="{{ $status }}">
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="Name, email, phone, enrolment no., ID" class="form-input w-72 py-2" aria-label="Search lawyers">
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="Name, email, phone, enrolment no., ID" class="form-input w-72 rounded-full py-2" aria-label="Search lawyers">
             <button class="btn-outline">Search</button>
         </form>
     </div>

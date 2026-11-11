@@ -11,7 +11,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $fullTitle }}</title>
     <meta name="description" content="{{ $description }}">
-    <meta name="theme-color" content="#142540">
+    <meta name="theme-color" content="#0a7f78">
     <meta name="color-scheme" content="light">
     @if ($noindex)<meta name="robots" content="noindex, nofollow">@endif
     <link rel="canonical" href="{{ $canonical ?? url()->current() }}">
@@ -28,57 +28,49 @@
 <body class="flex min-h-screen flex-col bg-white">
 <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">Skip to content</a>
 
-{{-- Top contact strip --}}
-<div class="hidden bg-brand-950 text-xs text-brand-100 sm:block">
-    <div class="container-page flex h-9 items-center justify-between">
-        <p class="flex items-center gap-2"><x-icon name="shield" class="size-4 text-gold-300"/> Verified lawyers · Your contact details stay private</p>
-        <p class="flex items-center gap-4">
-            <span class="hidden md:inline">{{ $site['support_hours'] }}</span>
-            <a href="tel:{{ preg_replace('/[^\d+]/', '', $site['company_phone']) }}" class="inline-flex items-center gap-1.5 font-semibold text-white hover:text-gold-200"><x-icon name="phone" class="size-3.5"/> {{ $site['company_phone'] }}</a>
-        </p>
-    </div>
-</div>
-
-<header x-data="{ open: false }" class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur">
-    <div class="container-page flex h-16 items-center justify-between gap-4">
+<header x-data="{ open: false, scrolled: false }" @scroll.window="scrolled = window.scrollY > 8" class="sticky top-0 z-40 transition-all" :class="scrolled ? 'bg-white/85 shadow-[0_1px_0_rgb(11_19_36/0.06)] backdrop-blur-xl' : 'bg-white/0'">
+    <div class="container-page flex h-[72px] items-center justify-between gap-4">
         <a href="{{ route('home') }}" aria-label="MAT LEGAL NETWORK home"><x-logo/></a>
 
-        <nav class="hidden items-center gap-1 lg:flex" aria-label="Main">
-            @foreach ([['lawyers.index', 'Find a Lawyer'], ['for-lawyers', 'For Lawyers'], ['about', 'About Us'], ['contact', 'Contact']] as [$r, $l])
-                <a href="{{ route($r) }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs($r.'*') ? 'text-brand-800 bg-brand-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">{{ $l }}</a>
+        <nav class="hidden items-center gap-1 rounded-full bg-slate-100/80 p-1 lg:flex" aria-label="Main">
+            @foreach ([['lawyers.index', 'Find a Lawyer'], ['for-lawyers', 'For Lawyers'], ['about', 'About'], ['contact', 'Contact']] as [$r, $l])
+                <a href="{{ route($r) }}" class="rounded-full px-4 py-2 text-sm font-bold transition {{ request()->routeIs($r.'*') ? 'bg-white text-ink shadow-pop' : 'text-slate-600 hover:text-ink' }}">{{ $l }}</a>
             @endforeach
         </nav>
 
         <div class="hidden items-center gap-2 lg:flex">
+            <a href="tel:{{ preg_replace('/[^\d+]/', '', $site['company_phone']) }}" class="mr-1 inline-flex items-center gap-2 text-sm font-bold text-ink hover:text-brand-700">
+                <span class="tile size-8 bg-brand-50 text-brand-600"><x-icon name="phone" class="size-4"/></span>{{ $site['company_phone'] }}
+            </a>
             @auth
-                <a href="{{ auth()->user()->homeRoute() }}" class="btn-outline">My dashboard</a>
+                <a href="{{ auth()->user()->homeRoute() }}" class="btn-ink">Dashboard</a>
                 <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn-ghost">Log out</button></form>
             @else
-                <a href="{{ route('login') }}" class="btn-ghost">Lawyer login</a>
-                <a href="{{ route('register') }}" class="btn-gold">Join as a Lawyer</a>
+                <a href="{{ route('login') }}" class="btn-ghost">Log in</a>
+                <a href="{{ route('register') }}" class="btn-accent">Join as a Lawyer</a>
             @endauth
         </div>
 
-        <button type="button" class="btn-ghost -mr-2 lg:hidden" @click="open = !open" :aria-expanded="open" aria-controls="mobile-menu" aria-label="Toggle menu">
+        <button type="button" class="tile size-11 bg-slate-100 text-ink lg:hidden" @click="open = !open" :aria-expanded="open" aria-controls="mobile-menu" aria-label="Toggle menu">
             <x-icon name="menu" class="size-6" x-show="!open"/>
             <x-icon name="x" class="size-6" x-show="open" x-cloak/>
         </button>
     </div>
 
-    <div id="mobile-menu" x-show="open" x-cloak x-transition.opacity class="border-t border-slate-200 bg-white lg:hidden">
-        <nav class="container-page grid gap-1 py-3" aria-label="Mobile">
-            @foreach ([['lawyers.index', 'Find a Lawyer'], ['for-lawyers', 'For Lawyers'], ['about', 'About Us'], ['contact', 'Contact']] as [$r, $l])
-                <a href="{{ route($r) }}" class="rounded-lg px-3 py-2.5 text-base font-medium text-slate-700 hover:bg-slate-50">{{ $l }}</a>
+    <div id="mobile-menu" x-show="open" x-cloak x-transition.origin.top class="border-t border-slate-100 bg-white shadow-pop-lg lg:hidden">
+        <nav class="container-page grid gap-1 py-4" aria-label="Mobile">
+            @foreach ([['lawyers.index', 'Find a Lawyer', 'search'], ['for-lawyers', 'For Lawyers', 'briefcase'], ['about', 'About', 'info'], ['contact', 'Contact', 'chat']] as [$r, $l, $i])
+                <a href="{{ route($r) }}" class="flex items-center gap-3 rounded-2xl px-3 py-3 text-base font-bold text-ink hover:bg-slate-50"><span class="tile size-9 bg-brand-50 text-brand-600"><x-icon :name="$i" class="size-5"/></span>{{ $l }}</a>
             @endforeach
-            <div class="mt-2 grid gap-2 border-t border-slate-100 pt-3">
+            <div class="mt-3 grid gap-2 border-t border-slate-100 pt-4">
                 @auth
-                    <a href="{{ auth()->user()->homeRoute() }}" class="btn-outline">My dashboard</a>
-                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn-ghost w-full">Log out</button></form>
+                    <a href="{{ auth()->user()->homeRoute() }}" class="btn-ink py-3">Dashboard</a>
+                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn-outline w-full py-3">Log out</button></form>
                 @else
-                    <a href="{{ route('register') }}" class="btn-gold">Join as a Lawyer</a>
-                    <a href="{{ route('login') }}" class="btn-outline">Lawyer login</a>
+                    <a href="{{ route('register') }}" class="btn-accent py-3">Join as a Lawyer</a>
+                    <a href="{{ route('login') }}" class="btn-outline py-3">Lawyer log in</a>
                 @endauth
-                <a href="tel:{{ preg_replace('/[^\d+]/', '', $site['company_phone']) }}" class="btn-primary"><x-icon name="phone" class="size-4"/> {{ $site['company_phone'] }}</a>
+                <a href="tel:{{ preg_replace('/[^\d+]/', '', $site['company_phone']) }}" class="btn-primary py-3"><x-icon name="phone" class="size-4"/> {{ $site['company_phone'] }}</a>
             </div>
         </nav>
     </div>
@@ -88,50 +80,35 @@
     {{ $slot }}
 </main>
 
-<footer class="mt-16 bg-brand-950 text-brand-100">
-    <div class="container-page grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-5">
+<footer class="relative mt-24 overflow-hidden bg-ink text-slate-300">
+    <div class="pointer-events-none absolute -top-40 -left-24 size-[28rem] rounded-full bg-brand-500/25 blur-3xl"></div>
+    <div class="pointer-events-none absolute -right-24 -bottom-40 size-[26rem] rounded-full bg-coral-500/20 blur-3xl"></div>
+    <div class="container-page relative grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-5">
         <div class="lg:col-span-2">
             <x-logo light/>
-            <p class="mt-4 max-w-sm text-sm leading-6 text-brand-200">India's growing network of verified advocates. Search freely, then speak to our team – we connect you with the right lawyer while keeping everyone's contact details private.</p>
-            <div class="mt-5 grid gap-2 text-sm">
-                <a href="tel:{{ preg_replace('/[^\d+]/', '', $site['company_phone']) }}" class="inline-flex items-center gap-2 hover:text-white"><x-icon name="phone" class="size-4 text-gold-300"/> {{ $site['company_phone'] }}</a>
-                <a href="https://wa.me/{{ preg_replace('/\D/', '', $site['company_whatsapp']) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 hover:text-white"><x-icon name="whatsapp" class="size-4 text-gold-300"/> WhatsApp</a>
-                <a href="mailto:{{ $site['company_email'] }}" class="inline-flex items-center gap-2 hover:text-white"><x-icon name="mail" class="size-4 text-gold-300"/> {{ $site['company_email'] }}</a>
+            <p class="mt-5 max-w-sm text-sm leading-6 text-slate-400">India's growing network of verified advocates. Search freely, then talk to our team – we connect you with the right lawyer while keeping everyone's number private.</p>
+            <div class="mt-6 flex flex-wrap gap-2">
+                <a href="tel:{{ preg_replace('/[^\d+]/', '', $site['company_phone']) }}" class="btn bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/15"><x-icon name="phone" class="size-4"/> {{ $site['company_phone'] }}</a>
+                <a href="https://wa.me/{{ preg_replace('/\D/', '', $site['company_whatsapp']) }}" target="_blank" rel="noopener" class="btn bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/15"><x-icon name="whatsapp" class="size-4"/> WhatsApp</a>
             </div>
+            <a href="mailto:{{ $site['company_email'] }}" class="mt-4 inline-flex items-center gap-2 text-sm hover:text-white"><x-icon name="mail" class="size-4 text-brand-300"/> {{ $site['company_email'] }}</a>
         </div>
-        <div>
-            <h2 class="font-sans text-sm font-semibold tracking-wide text-white uppercase">Explore</h2>
-            <ul class="mt-4 space-y-2.5 text-sm">
-                <li><a href="{{ route('lawyers.index') }}" class="hover:text-white">Find a lawyer</a></li>
-                <li><a href="{{ route('lawyers.index', ['area' => 'criminal-law']) }}" class="hover:text-white">Criminal lawyers</a></li>
-                <li><a href="{{ route('lawyers.index', ['area' => 'family-divorce']) }}" class="hover:text-white">Divorce lawyers</a></li>
-                <li><a href="{{ route('lawyers.index', ['area' => 'property-real-estate']) }}" class="hover:text-white">Property lawyers</a></li>
-                <li><a href="{{ route('about') }}" class="hover:text-white">About us</a></li>
-                <li><a href="{{ route('contact') }}" class="hover:text-white">Contact</a></li>
-            </ul>
-        </div>
-        <div>
-            <h2 class="font-sans text-sm font-semibold tracking-wide text-white uppercase">For lawyers</h2>
-            <ul class="mt-4 space-y-2.5 text-sm">
-                <li><a href="{{ route('for-lawyers') }}" class="hover:text-white">Why join</a></li>
-                <li><a href="{{ route('register') }}" class="hover:text-white">Register free</a></li>
-                <li><a href="{{ route('login') }}" class="hover:text-white">Lawyer login</a></li>
-                <li><a href="{{ route('legal', 'lawyer-terms') }}" class="hover:text-white">Listing terms</a></li>
-            </ul>
-        </div>
-        <div>
-            <h2 class="font-sans text-sm font-semibold tracking-wide text-white uppercase">Legal</h2>
-            <ul class="mt-4 space-y-2.5 text-sm">
-                @foreach (\App\Http\Controllers\PageController::LEGAL as $slug => $label)
-                    @continue($slug === 'lawyer-terms')
-                    <li><a href="{{ route('legal', $slug) }}" class="hover:text-white">{{ $label }}</a></li>
-                @endforeach
-            </ul>
-        </div>
+        @foreach ([
+            'Explore' => [[route('lawyers.index'), 'Find a lawyer'], [route('lawyers.index', ['area' => 'criminal-law']), 'Criminal lawyers'], [route('lawyers.index', ['area' => 'family-divorce']), 'Divorce lawyers'], [route('lawyers.index', ['area' => 'property-real-estate']), 'Property lawyers'], [route('about'), 'About us'], [route('contact'), 'Contact']],
+            'For lawyers' => [[route('for-lawyers'), 'Why join'], [route('register'), 'Register free'], [route('login'), 'Lawyer log in'], [route('legal', 'lawyer-terms'), 'Listing terms']],
+            'Legal' => collect(\App\Http\Controllers\PageController::LEGAL)->except('lawyer-terms')->map(fn ($l, $s) => [route('legal', $s), $l])->values()->all(),
+        ] as $heading => $links)
+            <div>
+                <h2 class="text-xs font-extrabold tracking-[0.18em] text-white uppercase">{{ $heading }}</h2>
+                <ul class="mt-5 space-y-3 text-sm">
+                    @foreach ($links as [$href, $label])<li><a href="{{ $href }}" class="transition hover:text-white">{{ $label }}</a></li>@endforeach
+                </ul>
+            </div>
+        @endforeach
     </div>
-    <div class="border-t border-white/10">
-        <div class="container-page flex flex-col gap-3 py-6 text-xs text-brand-300 md:flex-row md:items-center md:justify-between">
-            <p>© {{ date('Y') }} {{ $site['legal_entity_name'] }}. All rights reserved. "MAT LEGAL NETWORK", the logo, website design, text, data compilation and software are protected under the Copyright Act, 1957 and applicable trademark laws. Unauthorised copying, scraping or reproduction is prohibited.</p>
+    <div class="relative border-t border-white/10">
+        <div class="container-page flex flex-col gap-3 py-7 text-xs text-slate-500 md:flex-row md:items-center md:justify-between">
+            <p class="max-w-3xl">© {{ date('Y') }} {{ $site['legal_entity_name'] }}. All rights reserved. "MAT LEGAL NETWORK", the logo, website design, text, data compilation and software are protected under the Copyright Act, 1957 and applicable trademark laws. Unauthorised copying, scraping or reproduction is prohibited.</p>
             <p class="shrink-0">MAT LEGAL NETWORK is not a law firm and does not provide legal advice.</p>
         </div>
     </div>
@@ -139,11 +116,11 @@
 
 {{-- Bar Council of India compliant disclaimer (shown once, on public pages only) --}}
 @if ($disclaimer)
-<div x-data="disclaimer" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-4 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="disclaimer-title" data-testid="disclaimer">
-    <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+<div x-data="disclaimer" x-show="open" x-cloak x-transition.opacity class="fixed inset-0 z-50 flex items-end justify-center bg-ink/60 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="disclaimer-title" data-testid="disclaimer">
+    <div class="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-pop-lg sm:p-7">
         <div class="flex items-center gap-3">
-            <span class="inline-flex size-10 items-center justify-center rounded-full bg-gold-50 text-gold-600"><x-icon name="scale" class="size-5"/></span>
-            <h2 id="disclaimer-title" class="text-lg font-semibold text-slate-900">Disclaimer</h2>
+            <span class="tile size-12 bg-coral-100 text-coral-600"><x-icon name="scale" class="size-6"/></span>
+            <div><p class="text-xs font-bold tracking-wider text-coral-600 uppercase">Before you continue</p><h2 id="disclaimer-title" class="text-xl">Disclaimer</h2></div>
         </div>
         <div class="mt-4 max-h-[50vh] space-y-3 overflow-y-auto text-sm leading-6 text-slate-600">
             <p>As per the rules of the Bar Council of India, advocates are not permitted to solicit work or advertise. By clicking <strong>“I agree”</strong>, you confirm that:</p>

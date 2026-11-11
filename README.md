@@ -6,7 +6,7 @@ A directory of verified lawyers (India first, ready to go global later).
 - **Lawyers** register with a 5-step form and upload their Bar enrolment proof and ID. Profiles stay **pending until the admin approves them**. After approval, lawyers can edit their profile. Edits go live immediately and are **logged for the admin to review**.
 - **Admin** (the company) approves, rejects with a reason, suspends or reinstates lawyers, views private documents (every view is logged), handles client enquiries and assigns them to lawyers, reviews profile changes, manages the filter lists, edits company contact and legal details, and sees a full audit log.
 
-Built with **Laravel 13 + MySQL + Blade + Tailwind CSS 4 + Alpine.js**. It needs no Node.js, Redis or background workers on the server, so it runs on **cheap shared hosting** (cPanel/Hostinger-style).
+Built with **Laravel 13 + MySQL + Blade + Tailwind CSS 4 + Alpine.js**. The design is bold and vibrant, light theme by default: electric teal (primary), coral (accent) and ink, set in Plus Jakarta Sans. Colour tokens live in `resources/css/app.css`, and every text/background pairing meets WCAG AA contrast. It needs no Node.js, Redis or background workers on the server, so it runs on **cheap shared hosting** (cPanel/Hostinger-style).
 
 ---
 
@@ -71,7 +71,7 @@ npm install && npm run build
 
 ## Tests
 
-### 1. Feature & unit tests (63 tests, 642 assertions)
+### 1. Feature & unit tests (64 tests, 650 assertions)
 
 They run against a real MySQL database, `mat_legal_test` (see `phpunit.xml`):
 

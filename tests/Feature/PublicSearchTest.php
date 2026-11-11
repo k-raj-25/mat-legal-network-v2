@@ -15,7 +15,7 @@ class PublicSearchTest extends TestCase
     {
         $this->lawyer();
         $this->get('/')->assertOk()
-            ->assertSee('Find the right lawyer', false)
+            ->assertSee('Legal help,', false)
             ->assertSee('data-testid="hero-search"', false)
             ->assertSee('Bar Council of India', false)
             ->assertSee('Join as a Lawyer');

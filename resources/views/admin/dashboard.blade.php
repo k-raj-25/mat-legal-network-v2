@@ -1,15 +1,15 @@
 <x-layouts.admin title="Dashboard">
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach ([
-            ['Pending approval', $counts['pending'], route('admin.lawyers.index', ['status' => 'pending']), 'bg-amber-50 text-amber-700'],
-            ['Live lawyers', $counts['approved'], route('admin.lawyers.index', ['status' => 'approved']), 'bg-emerald-50 text-emerald-700'],
-            ['New enquiries', $counts['new_enquiries'], route('admin.enquiries.index', ['status' => 'new']), 'bg-sky-50 text-sky-700'],
-            ['Unreviewed profile changes', $counts['unreviewed_changes'], route('admin.changes.index'), 'bg-indigo-50 text-indigo-700'],
-        ] as [$label, $value, $href, $tone])
-            <a href="{{ $href }}" class="card block p-5 hover:border-brand-200 hover:shadow-md" data-testid="stat">
-                <p class="text-sm text-slate-500">{{ $label }}</p>
-                <p class="mt-2 flex items-baseline gap-2"><span class="font-display text-3xl font-bold text-slate-900">{{ number_format($value) }}</span></p>
-                <span class="mt-3 inline-block rounded-md px-2 py-0.5 text-xs font-semibold {{ $tone }}">View →</span>
+            ['Pending approval', $counts['pending'], route('admin.lawyers.index', ['status' => 'pending']), 'bg-amber-100 text-amber-700', 'clock'],
+            ['Live lawyers', $counts['approved'], route('admin.lawyers.index', ['status' => 'approved']), 'bg-brand-100 text-brand-700', 'users'],
+            ['New enquiries', $counts['new_enquiries'], route('admin.enquiries.index', ['status' => 'new']), 'bg-coral-100 text-coral-700', 'inbox'],
+            ['Unreviewed profile changes', $counts['unreviewed_changes'], route('admin.changes.index'), 'bg-violet-100 text-violet-700', 'list'],
+        ] as [$label, $value, $href, $tone, $icon])
+            <a href="{{ $href }}" class="card group block p-5 transition hover:-translate-y-0.5 hover:shadow-pop-lg" data-testid="stat">
+                <div class="flex items-center justify-between"><span class="tile size-11 {{ $tone }}"><x-icon :name="$icon" class="size-5"/></span><x-icon name="arrow-right" class="size-4 text-slate-300 transition group-hover:text-ink"/></div>
+                <p class="mt-4 font-display text-4xl font-extrabold text-ink">{{ number_format($value) }}</p>
+                <p class="mt-1 text-sm font-semibold text-slate-500">{{ $label }}</p>
             </a>
         @endforeach
     </div>
@@ -18,7 +18,7 @@
     <div class="mt-8 grid gap-6 xl:grid-cols-2">
         <section class="card overflow-hidden">
             <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-                <h2 class="font-sans font-semibold">Oldest pending registrations</h2>
+                <h2 class="text-lg">Oldest pending registrations</h2>
                 <a href="{{ route('admin.lawyers.index') }}" class="text-sm font-medium text-brand-700">View all</a>
             </div>
             <ul class="divide-y divide-slate-100">
@@ -34,7 +34,7 @@
         </section>
         <section class="card overflow-hidden">
             <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-                <h2 class="font-sans font-semibold">Latest enquiries</h2>
+                <h2 class="text-lg">Latest enquiries</h2>
                 <a href="{{ route('admin.enquiries.index') }}" class="text-sm font-medium text-brand-700">View all</a>
             </div>
             <ul class="divide-y divide-slate-100">
