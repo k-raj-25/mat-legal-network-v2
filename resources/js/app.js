@@ -44,8 +44,13 @@ Alpine.data('cityPicker', ({ url, state = '', city = '', key = 'id', initial = n
 Alpine.data('disclaimer', () => ({
     open: false,
     init() {
+        this.sync();
+        // Back/forward cache restores the page as it was; re-check in case it was accepted elsewhere.
+        window.addEventListener('pageshow', (e) => { if (e.persisted) this.sync(); });
+    },
+    sync() {
         this.open = !document.cookie.split('; ').some((c) => c.startsWith('mln_disclaimer=1'));
-        if (this.open) document.documentElement.classList.add('overflow-hidden');
+        document.documentElement.classList.toggle('overflow-hidden', this.open);
     },
     accept() {
         document.cookie = 'mln_disclaimer=1; max-age=' + 60 * 60 * 24 * 180 + '; path=/; SameSite=Lax';

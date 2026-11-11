@@ -103,7 +103,7 @@ npm install && npm run build
 
 ## Tests
 
-### 1. Feature & unit tests (64 tests, 650 assertions)
+### 1. Feature & unit tests (65 tests, 668 assertions)
 
 They run against a real MySQL database, `mat_legal_test` (see `phpunit.xml`):
 
@@ -115,7 +115,7 @@ They cover search filters and sorting, privacy leaks, registration validation an
 
 ### 2. Browser UI tests (Playwright, desktop + iPhone)
 
-29 checks: disclaimer, hero search with dependent dropdowns, filters and chips, mobile filter drawer, profile privacy, enquiry form, the full register → approve → edit → change-log flow, no horizontal overflow, and no JS errors.
+33 checks: disclaimer (including "Read full disclaimer" and Back), hero search with dependent dropdowns, filters and chips, mobile filter drawer, profile privacy, enquiry form, the full register → approve → edit → change-log flow, no horizontal overflow, and no JS errors.
 
 ```bash
 php artisan cache:clear

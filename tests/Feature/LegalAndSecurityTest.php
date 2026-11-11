@@ -33,6 +33,22 @@ class LegalAndSecurityTest extends TestCase
         }
     }
 
+    public function test_disclaimer_popup_is_not_shown_on_the_pages_it_links_to(): void
+    {
+        $popup = 'data-testid="disclaimer"';
+        foreach (PageController::DISCLAIMER_FREE as $page) {
+            $this->get('/legal/'.$page)->assertOk()->assertDontSee($popup, false);
+        }
+        foreach (array_diff(array_keys(PageController::LEGAL), PageController::DISCLAIMER_FREE) as $page) {
+            $this->get('/legal/'.$page)->assertOk()->assertSee($popup, false);
+        }
+        // The popup's own links point at exactly the pages that skip it.
+        $home = $this->get('/')->assertOk()->assertSee($popup, false);
+        foreach (PageController::DISCLAIMER_FREE as $page) {
+            $home->assertSee(route('legal', $page), false);
+        }
+    }
+
     public function test_footer_links_to_every_legal_page_and_shows_copyright(): void
     {
         $res = $this->get('/about')->assertOk();

@@ -61,6 +61,58 @@ function makeFiles() {
     for (const [label, opts] of [['desktop', { viewport: { width: 1366, height: 900 } }], ['mobile', { ...devices['iPhone 13'] }]]) {
         const { ctx, page } = await newPage(browser, opts, label);
 
+        await step(`[${label}] "Read full disclaimer" opens a readable page; popup returns on Back`, async () => {
+            const modal = page.getByTestId('disclaimer');
+            const locked = () => page.evaluate(() => document.documentElement.classList.contains('overflow-hidden'));
+            await page.goto('/');
+            await modal.waitFor({ state: 'visible' });
+            await modal.getByRole('link', { name: 'Read full disclaimer' }).click();
+            await page.waitForURL(/\/legal\/disclaimer$/);
+            await page.getByTestId('legal-content').waitFor();
+            await page.waitForTimeout(300);
+            assert(!(await modal.isVisible()), 'popup covers the full disclaimer');
+            assert(!(await locked()), 'page scroll is locked on the full disclaimer');
+            // The text is readable and on top: the last section heading can be scrolled to and is not covered.
+            const last = page.getByTestId('legal-content').getByRole('heading', { name: /Limitation of liability/ });
+            await last.scrollIntoViewIfNeeded();
+            await last.click({ trial: true });
+            assert((await page.evaluate(() => window.scrollY)) > 0, 'page did not scroll');
+            await noOverflow(page);
+            await shot(page, '01a-full-disclaimer');
+
+            await page.goBack();
+            await page.waitForURL((u) => u.pathname === '/');
+            await modal.waitFor({ state: 'visible' });
+            assert(await locked(), 'scroll not locked behind the popup after Back');
+
+            await modal.getByRole('link', { name: 'Cookie Policy' }).click();
+            await page.waitForURL(/\/legal\/cookies$/);
+            await page.getByTestId('legal-content').waitFor();
+            await page.waitForTimeout(300);
+            assert(!(await modal.isVisible()), 'popup covers the cookie policy');
+
+            await page.goBack();
+            await page.waitForURL((u) => u.pathname === '/');
+            await modal.waitFor({ state: 'visible' });
+
+            await page.goto('/legal/terms');
+            await modal.waitFor({ state: 'visible' });
+        });
+
+        await step(`[${label}] popup accepted on another page stays closed after Back`, async () => {
+            await page.goto('/about');
+            await page.getByTestId('disclaimer').waitFor({ state: 'visible' });
+            await page.goto('/legal/terms');
+            await page.getByTestId('disclaimer-accept').click();
+            await page.getByTestId('disclaimer').waitFor({ state: 'hidden' });
+            await page.goBack();
+            await page.waitForURL(/\/about$/);
+            await page.waitForTimeout(300);
+            assert(!(await page.getByTestId('disclaimer').isVisible()), 'stale popup after Back');
+            assert(!(await page.evaluate(() => document.documentElement.classList.contains('overflow-hidden'))), 'scroll still locked after Back');
+            await page.context().clearCookies();
+        });
+
         await step(`[${label}] disclaimer shows once, then is remembered`, async () => {
             await page.goto('/');
             await page.getByTestId('disclaimer').waitFor({ state: 'visible' });

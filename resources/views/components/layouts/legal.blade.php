@@ -1,5 +1,6 @@
 @props(['title', 'page', 'updated'])
-<x-layouts.app :title="$title" :description="$title.' of MAT LEGAL NETWORK.'">
+{{-- The disclaimer popup links to these pages, so it must not cover them. --}}
+<x-layouts.app :title="$title" :description="$title.' of MAT LEGAL NETWORK.'" :disclaimer="! in_array($page, \App\Http\Controllers\PageController::DISCLAIMER_FREE, true)">
     <div class="relative overflow-hidden">
         <div class="pointer-events-none absolute inset-0 -z-10">
             <div class="dot-grid absolute inset-0 [mask-image:linear-gradient(to_bottom,black,transparent)]"></div>
