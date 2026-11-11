@@ -1,0 +1,95 @@
+name: windows-launcher
+
+# Runs start.bat on a real Windows machine: fresh install, a second copy while the
+# first is still running (port fallback, no re-download), and a database reset.
+# The repo is copied to a folder with spaces and brackets to catch quoting bugs.
+
+on:
+  push:
+    paths:
+      - start.bat
+      - scripts/local/**
+      - .github/workflows/windows-launcher.yml
+      - composer.lock
+  workflow_dispatch:
+
+jobs:
+  launcher:
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [system, portable]
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run start.bat three times and check the site
+        shell: pwsh
+        env:
+          MAT_NO_BROWSER: '1'
+          MAT_NO_PAUSE: '1'
+          MAT_PORTABLE_PHP: ${{ matrix.php == 'portable' && '1' || '' }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dir = Join-Path $env:RUNNER_TEMP 'mat legal (copy)'
+          New-Item -ItemType Directory -Path $dir | Out-Null
+          Copy-Item -Path "$env:GITHUB_WORKSPACE\*" -Destination $dir -Recurse
+          $bat = Get-Content -Raw "$dir\start.bat"
+          if ($bat -notmatch "`r`n") { throw 'start.bat was checked out without CRLF line endings' }
+
+          function Start-Launcher([string]$name, [string]$arg = '') {
+            Start-Process -FilePath cmd.exe -WorkingDirectory $dir -WindowStyle Hidden `
+              -ArgumentList '/c', "start.bat $arg > $name.log 2>&1"
+          }
+          function Wait-Site([int]$port, [string]$name) {
+            for ($i = 0; $i -lt 360; $i++) {
+              try { $r = Invoke-WebRequest "http://127.0.0.1:$port/" -UseBasicParsing -TimeoutSec 5; if ($r.StatusCode -eq 200) { return } } catch {}
+              Start-Sleep -Seconds 2
+            }
+            Get-Content "$dir\$name.log"
+            throw "Site did not come up on port $port"
+          }
+          function Test-Pages([int]$port) {
+            foreach ($p in '/', '/lawyers', '/login', '/about', '/contact', '/legal/privacy', '/sitemap.xml') {
+              $r = Invoke-WebRequest "http://127.0.0.1:$port$p" -UseBasicParsing
+              Write-Host "  $p -> $($r.StatusCode)"
+            }
+            $list = (Invoke-WebRequest "http://127.0.0.1:$port/lawyers" -UseBasicParsing).Content
+            if ($list -notmatch 'Adv\.') { throw 'No demo lawyers listed' }
+            # Admin login through the real form (CSRF + session).
+            $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+            $form = Invoke-WebRequest "http://127.0.0.1:$port/login" -WebSession $s -UseBasicParsing
+            $token = [regex]::Match($form.Content, 'name="_token" value="([^"]+)"').Groups[1].Value
+            $r = Invoke-WebRequest "http://127.0.0.1:$port/login" -Method Post -WebSession $s -UseBasicParsing `
+              -Body @{ _token = $token; email = 'admin@example.com'; password = 'Admin@12345' }
+            if ($r.BaseResponse.RequestMessage.RequestUri.AbsolutePath -ne '/admin') { throw "Admin login landed on $($r.BaseResponse.RequestMessage.RequestUri)" }
+            Write-Host '  admin login -> /admin'
+          }
+          function Stop-All { Get-Process php -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 2 }
+
+          Write-Host '== Run 1: fresh install'
+          Start-Launcher 'run1'
+          Wait-Site 8000 'run1'
+          Test-Pages 8000
+          Get-Content "$dir\run1.log"
+
+          Write-Host '== Run 2: second copy while the first is still running'
+          Start-Launcher 'run2'
+          Wait-Site 8001 'run2'
+          Test-Pages 8001
+          $log2 = Get-Content -Raw "$dir\run2.log"
+          Write-Host $log2
+          if ($log2 -notmatch 'Packages are up to date') { throw 'Run 2 reinstalled packages' }
+          if ($log2 -match 'Downloading') { throw 'Run 2 downloaded something again' }
+          if ($log2 -notmatch 'Demo lawyers already present') { throw 'Run 2 re-seeded demo data' }
+          Stop-All
+
+          Write-Host '== Run 3: reset'
+          Start-Launcher 'run3' 'reset'
+          Wait-Site 8000 'run3'
+          Test-Pages 8000
+          $log3 = Get-Content -Raw "$dir\run3.log"
+          Write-Host $log3
+          if ($log3 -notmatch 'Wiping the local database') { throw 'Reset did not wipe the database' }
+          Stop-All

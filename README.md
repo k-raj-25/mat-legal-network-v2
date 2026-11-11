@@ -25,6 +25,38 @@ Built with **Laravel 13 + MySQL + Blade + Tailwind CSS 4 + Alpine.js**. The desi
 
 ---
 
+## Run it on Windows (one click)
+
+**You need:** Windows 10 (version 1803 or newer) or Windows 11, and an internet connection for the first run. Nothing else: no MySQL, Node.js or XAMPP. If you already have PHP 8.3+ with the right extensions, it is used; otherwise the launcher downloads a private copy of PHP into the `.tools` folder (your system is not changed).
+
+1. Get the code: `git clone https://github.com/k-raj-25/mat-legal-network-v2.git`, or download the ZIP from GitHub and unzip it.
+2. Double-click **`start.bat`** in the project folder.
+3. The first run takes a few minutes (downloads PHP and the PHP packages, creates the database, adds 60 demo lawyers). Your browser then opens **http://127.0.0.1:8000**.
+4. Keep the black window open while you use the site. Press **Ctrl+C** in it (or close it) to stop.
+
+Next time, double-click `start.bat` again; it skips everything that is already done and starts in a few seconds.
+
+| What | Where |
+|---|---|
+| Public site | http://127.0.0.1:8000 |
+| Log in (admin and lawyers) | http://127.0.0.1:8000/login |
+| Admin panel | http://127.0.0.1:8000/admin |
+| Admin login | `admin@example.com` / `Admin@12345` |
+| Demo lawyer logins | `demo.lawyer2@example.com`, `demo.lawyer3@example.com`, … (up to `demo.lawyer61`) / `password` |
+| E-mails the site "sends" | written to `storage\logs\laravel.log` |
+| Database | `database\database.sqlite` (a single file) |
+
+Good to know:
+
+- **Port busy?** If 8000 is taken (for example, the site is already running), the launcher picks 8001, 8002, … and prints the address it used.
+- **Start over with fresh demo data:** run `start.bat reset` from a terminal in the project folder. This deletes everything in the local database.
+- **Change the admin password:** run `.tools\php\php.exe artisan mat:create-admin admin@example.com` (or `php artisan …` if you use your own PHP). Changing `ADMIN_PASSWORD` in `.env` after the first run has no effect.
+- **Use MySQL instead of SQLite:** edit `.env` and set `DB_CONNECTION=mysql` plus the `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD` lines (create the database first). The launcher uses whatever `.env` says. Name search uses MySQL FULLTEXT, and a simpler `LIKE` search on SQLite.
+- **Options:** `set MAT_PORT=9000` before running picks another starting port, and `set MAT_NO_BROWSER=1` stops it opening the browser.
+- **Something broke?** Delete the `.tools` and `vendor` folders and run `start.bat` again. To reset your settings too, also delete `.env` and `database\database.sqlite`.
+
+---
+
 ## Local development
 
 Requirements: PHP 8.3+, Composer, MySQL 8 / MariaDB 10.6+, Node 20+ (only to rebuild CSS/JS).
