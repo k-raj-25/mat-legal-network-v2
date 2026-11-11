@@ -17,6 +17,9 @@ class PageController extends Controller
         'grievance' => 'Grievance Redressal',
     ];
 
+    /** Legal pages linked from the disclaimer popup; the popup is not shown on them so they can be read first. */
+    public const DISCLAIMER_FREE = ['disclaimer', 'cookies'];
+
     public function about()
     {
         return view('pages.about');
