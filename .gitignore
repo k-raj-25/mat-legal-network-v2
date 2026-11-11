@@ -25,3 +25,6 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 storage/e2e
+
+# Local Windows launcher downloads (start.bat)
+/.tools

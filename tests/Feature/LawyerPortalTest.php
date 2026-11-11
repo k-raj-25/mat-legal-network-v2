@@ -73,7 +73,8 @@ class LawyerPortalTest extends TestCase
         $this->get('/lawyers/'.$l->slug)->assertOk()->assertSee('Brand new bio text')->assertSee('Cyber Crime')->assertSee('Thane');
 
         $log = ProfileChangeLog::where('lawyer_profile_id', $l->id)->sole();
-        $this->assertSame(['old' => 'Old bio', 'new' => 'Brand new bio text'], $log->changes['bio']);
+        // MySQL JSON columns don't keep key order, so compare without it.
+        $this->assertEquals(['old' => 'Old bio', 'new' => 'Brand new bio text'], $log->changes['bio']);
         $this->assertSame('2500', $log->changes['consultation_fee']['new']);
         $this->assertSame('Thane', $log->changes['city_id']['new']);
         $this->assertStringContainsString('Cyber Crime', $log->changes['practice_areas']['new']);
