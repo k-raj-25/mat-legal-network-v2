@@ -1,0 +1,190 @@
+# MAT LEGAL NETWORK
+
+A directory of verified lawyers (India first, ready to go global later).
+
+- **Clients** search lawyers by state, city, practice area, name, experience, language, court, gender, fee and online consultation. They **never see a lawyer's phone number**. They contact the company instead, by helpline call, WhatsApp, or a callback request.
+- **Lawyers** register with a 5-step form and upload their Bar enrolment proof and ID. Profiles stay **pending until the admin approves them**. After approval, lawyers can edit their profile. Edits go live immediately and are **logged for the admin to review**.
+- **Admin** (the company) approves, rejects with a reason, suspends or reinstates lawyers, views private documents (every view is logged), handles client enquiries and assigns them to lawyers, reviews profile changes, manages the filter lists, edits company contact and legal details, and sees a full audit log.
+
+Built with **Laravel 13 + MySQL + Blade + Tailwind CSS 4 + Alpine.js**. It needs no Node.js, Redis or background workers on the server, so it runs on **cheap shared hosting** (cPanel/Hostinger-style).
+
+---
+
+## Features at a glance
+
+| Area | What's included |
+|---|---|
+| Privacy | Lawyers' phone, email, address, enrolment number and documents are never sent to public pages. Only whitelisted columns are queried, and the model hides private fields when serialised. Documents sit on a private disk and are streamed only to the owner and the admin. |
+| Contact | Company helpline (`tel:`), WhatsApp deep link pre-filled with the lawyer's Profile ID, and a callback form that creates an enquiry with a reference number. |
+| Approval workflow | `pending → approved / rejected (with reason) → resubmit → …`, plus `suspended` and reinstate. The lawyer is emailed at each step. |
+| Change log | Every edit is stored as an old → new diff. The admin can mark edits reviewed one by one or all at once. |
+| Legal | Terms of Use, Privacy Policy (DPDP Act 2023), BCI-compliant Disclaimer (with a first-visit popup), Lawyer Listing Terms, Cookie Policy, IP & Copyright Policy, and Grievance Redressal (IT Rules 2021). Company details in these pages are editable from **Admin › Settings**. |
+| Anti-abuse / anti-copying | Rate limits (search 90/min, enquiries 5/hour, login, register, password reset), a honeypot and time-trap on forms, a 100-page cap on deep pagination, robots.txt blocking AI/data crawlers, security headers, and copyright notices. |
+| SEO | Server-rendered pages, clean filter URLs, canonical tags, sitemap.xml, and per-profile meta descriptions. |
+| Global-ready | Countries table (India active; US, UK, UAE and others seeded but inactive), country-aware phone validation, and currency and bar-body label per country. |
+
+---
+
+## Local development
+
+Requirements: PHP 8.3+, Composer, MySQL 8 / MariaDB 10.6+, Node 20+ (only to rebuild CSS/JS).
+
+```bash
+composer install
+```
+
+```bash
+cp .env.example .env
+```
+
+```bash
+php artisan key:generate
+```
+
+Edit `.env`: set the database credentials, `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `ADMIN_NOTIFY_EMAIL`. Then:
+
+```bash
+php artisan migrate --seed
+```
+
+```bash
+php artisan storage:link
+```
+
+```bash
+php artisan db:seed --class=DemoSeeder
+```
+
+```bash
+php artisan serve
+```
+
+Open http://localhost:8000. Log in at `/login` with the admin credentials from `.env`. Demo lawyers use the password `password`.
+
+Front-end assets are **pre-built and committed** in `public/build`. Rebuild only after changing CSS/JS/Blade classes:
+
+```bash
+npm install && npm run build
+```
+
+---
+
+## Tests
+
+### 1. Feature & unit tests (63 tests, 642 assertions)
+
+They run against a real MySQL database, `mat_legal_test` (see `phpunit.xml`):
+
+```bash
+php artisan test
+```
+
+They cover search filters and sorting, privacy leaks, registration validation and uploads, the approval workflow, change logs, the enquiry anti-spam measures and rate limits, auth and password reset, every admin page, the legal pages and the security headers.
+
+### 2. Browser UI tests (Playwright, desktop + iPhone)
+
+29 checks: disclaimer, hero search with dependent dropdowns, filters and chips, mobile filter drawer, profile privacy, enquiry form, the full register → approve → edit → change-log flow, no horizontal overflow, and no JS errors.
+
+```bash
+php artisan cache:clear
+```
+
+```bash
+BASE_URL=http://127.0.0.1:8000 ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='your-password' node tests/Browser/e2e.cjs
+```
+
+### 3. Scalability
+
+```bash
+DEMO_LAWYERS=50000 php artisan db:seed --class=DemoSeeder
+```
+
+```bash
+node tests/Load/load.cjs http://127.0.0.1:8000 20 10 /lawyers "/lawyers?q=sharma"
+```
+
+Results measured on 50,000 lawyers (4 vCPU, PHP 8.3 with OPcache, MariaDB 10.11):
+
+| Search | DB time |
+|---|---|
+| No filters / state / state+city | 7–18 ms |
+| Practice area / language+court | 18–30 ms |
+| Name (FULLTEXT) / short-name LIKE | 8–35 ms |
+| All filters combined | 10 ms |
+| Page 50, sorted "newest" | 16 ms |
+
+Under load (20 concurrent users, 0 errors): search pages 100–120 req/s, profile pages about 150 req/s, home page about 170 req/s.
+
+---
+
+## Deploying to shared hosting (cPanel / Hostinger / similar)
+
+1. **Create a MySQL database and user** in the hosting panel.
+2. **Upload the code** (Git deploy, or a zip of the repo *including* `vendor/` if Composer isn't available on the host) to a folder **outside** `public_html`, for example `~/matlegal`.
+3. **Point the domain to `~/matlegal/public`.** Either set the domain's document root to that folder in the panel, or, if you can't change it, copy the contents of `public/` into `public_html` and edit the two paths in `public_html/index.php` to `../matlegal/vendor/autoload.php` and `../matlegal/bootstrap/app.php`.
+4. **Create `.env`** from `.env.example` and set:
+   - `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://your-domain`
+   - `DB_*` credentials
+   - `MAIL_MAILER=smtp` plus the SMTP details from your host or email provider
+   - `ADMIN_EMAIL`, `ADMIN_PASSWORD` (strong!), `ADMIN_NOTIFY_EMAIL`
+5. **Run these commands once** (from the panel's Terminal, or over SSH):
+
+   ```bash
+   php artisan key:generate --force
+   ```
+
+   ```bash
+   php artisan migrate --seed --force
+   ```
+
+   ```bash
+   php artisan storage:link
+   ```
+
+   ```bash
+   php artisan optimize
+   ```
+
+   After the first login, **remove `ADMIN_PASSWORD` from `.env`**. To reset the admin password later, run `php artisan mat:create-admin you@domain.com`.
+6. **Add one cron job** (Panel › Cron Jobs, every minute). It sends queued emails and runs maintenance:
+
+   ```bash
+   * * * * * cd ~/matlegal && php artisan schedule:run >> /dev/null 2>&1
+   ```
+
+7. **Enable SSL** (free Let's Encrypt in most panels). The app forces HTTPS in production.
+8. **Log in** at `https://your-domain/login`, open **Admin › Settings**, and enter the real helpline number, WhatsApp number, email, registered address, legal entity name, jurisdiction city and Grievance Officer. These are used across the site and in the legal pages.
+
+**If `storage:link` isn't allowed** (some hosts block symlinks), ask the host's support to create the link from `public/storage` to `storage/app/public`. Profile photos are the only public uploads; verification documents stay private regardless.
+
+Recommended PHP extensions: `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `gd`, `intl`. These are standard on most hosts. Make sure **OPcache** is enabled; it makes the app 3–4× faster.
+
+---
+
+## Protecting the business
+
+The code adds terms, copyright notices, robots.txt rules and rate limits. Strong protection also needs a few steps outside the code:
+
+1. **Have a practising lawyer review the legal pages** before launch, especially Terms, Privacy and Lawyer Listing Terms. They are thorough templates for Indian law, but they are not a substitute for advice on your exact business structure.
+2. **Register the trademark "MAT LEGAL NETWORK"** and the logo with the Indian Trade Marks Registry (classes 45 and 35, optionally 42). Until it is registered, use ™, not ®.
+3. **Keep this GitHub repository private.** The `LICENSE` file is proprietary (all rights reserved).
+4. Consider putting the site behind **Cloudflare** (free plan) for extra bot and scraping protection, and add Cloudflare Turnstile to forms if spam grows.
+5. Note that a *business idea* itself cannot be copyrighted. What is protected is your brand, your code and design, your content and your compiled directory data.
+
+---
+
+## Project map
+
+```
+app/Services/LawyerSearch.php          public search (filters, sorting, FULLTEXT)
+app/Services/LawyerProfileService.php  registration, edits, change-log diffs, documents
+app/Services/LawyerReviewService.php   approve / reject / suspend + emails + audit
+app/Http/Controllers/Admin/*           admin panel
+app/Http/Controllers/Lawyer/*          lawyer portal
+app/Support/SpamGuard.php              honeypot + time-trap
+resources/views/legal/*                legal documents
+database/data/*.php                    Indian states/cities, practice areas, languages, courts, bar councils
+tests/Feature, tests/Unit              PHPUnit tests
+tests/Browser/e2e.cjs                  Playwright UI tests
+tests/Load/load.cjs                    load test script
+```
