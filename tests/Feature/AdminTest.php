@@ -46,6 +46,30 @@ class AdminTest extends TestCase
         $this->get('/admin/lawyers/'.$l->slug)->assertSee($l->phone)->assertSee($l->enrolment_number); // admin sees private data
     }
 
+    public function test_lawyer_rows_link_to_profile_and_approved_rows_have_no_review_button(): void
+    {
+        $approved = $this->lawyer(LawyerStatus::Approved);
+        $pending = $this->lawyer(LawyerStatus::Pending);
+        $this->actingAs($this->admin());
+
+        $review = fn (LawyerProfile $l) => 'href="'.route('admin.lawyers.show', $l).'" class="btn-outline btn-sm">Review</a>';
+        $row = fn (LawyerProfile $l) => 'data-row-href="'.route('admin.lawyers.show', $l).'"';
+
+        $res = $this->get('/admin/lawyers?status=approved')->assertOk();
+        $this->assertSame(1, substr_count($res->getContent(), $approved->user->email), 'email must render once, inside its cell');
+        $res->assertSee($row($approved), false)
+            ->assertSee('href="'.route('admin.lawyers.show', $approved).'" class="row-link', false)
+            ->assertDontSee('>Review</a>', false);
+
+        $this->get('/admin/lawyers?status=pending')->assertOk()
+            ->assertSee($row($pending), false)->assertSee($review($pending), false);
+
+        // In "All", only the approved row loses its button; every row is still clickable.
+        $this->get('/admin/lawyers?status=all')->assertOk()
+            ->assertSee($row($approved), false)->assertSee($row($pending), false)
+            ->assertSee($review($pending), false)->assertDontSee($review($approved), false);
+    }
+
     public function test_approve_publishes_lawyer_and_notifies(): void
     {
         Notification::fake();
@@ -173,6 +197,19 @@ class AdminTest extends TestCase
         $this->assertGuest();
         // An already-logged-in disabled user is kicked out.
         $this->actingAs($l->user->fresh())->get('/lawyer')->assertRedirect('/login');
+    }
+
+    public function test_enquiry_rows_link_to_enquiry_without_open_button(): void
+    {
+        $e = Enquiry::create(['name' => 'Row Client', 'phone' => '9811122233', 'message' => 'Need a lawyer please', 'preferred_contact' => 'call', 'consented_at' => now()]);
+        $this->actingAs($this->admin());
+
+        $res = $this->get('/admin/enquiries')->assertOk();
+        $this->assertSame(1, substr_count($res->getContent(), 'Row Client'));
+        $res->assertSee('data-row-href="'.route('admin.enquiries.show', $e).'"', false)
+            ->assertSee('href="'.route('admin.enquiries.show', $e).'" class="row-link', false)
+            ->assertDontSee('>Open</a>', false);
+        $this->get('/admin/enquiries?q=nobody-matches')->assertOk()->assertSee('colspan="5"', false);
     }
 
     public function test_enquiry_management(): void

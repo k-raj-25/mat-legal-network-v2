@@ -3,6 +3,28 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 
 /**
+ * Clickable table rows: <tr data-row-href="..."> opens the URL when clicked anywhere
+ * that is not already an interactive control. Ctrl/Cmd/Shift or middle click opens a
+ * new tab, and selecting text does not navigate. Keyboard users use the row's own link.
+ */
+function rowTarget(e) {
+    const row = e.target.closest('tr[data-row-href]');
+    if (!row || e.target.closest('a, button, input, select, textarea, label, summary, [role="button"]')) return null;
+    if (String(window.getSelection?.() ?? '').length) return null;
+    return row;
+}
+document.addEventListener('click', (e) => {
+    const row = e.button === 0 ? rowTarget(e) : null;
+    if (!row) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey) window.open(row.dataset.rowHref, '_blank', 'noopener');
+    else window.location.assign(row.dataset.rowHref);
+});
+document.addEventListener('auxclick', (e) => {
+    const row = e.button === 1 ? rowTarget(e) : null;
+    if (row) window.open(row.dataset.rowHref, '_blank', 'noopener');
+});
+
+/**
  * Dependent State -> City dropdown.
  * Usage: x-data="cityPicker({ url: '/locations/:state/cities', state: '..', city: '..', key: 'id'|'slug' })"
  */
@@ -103,6 +125,186 @@ Alpine.data('checkList', (max = 10) => ({
     init() { this.recount(); },
     recount() { this.count = this.$root.querySelectorAll('input[type=checkbox]:checked').length; },
     matches(label) { return label.toLowerCase().includes(this.q.toLowerCase()); },
+}));
+
+/**
+ * Searchable lawyer picker (ARIA 1.2 combobox + listbox) for the admin enquiry page.
+ * Results come from the server a page at a time, so it works with any number of lawyers.
+ * The selected profile ID lives in a hidden input; the visible input is only for searching.
+ */
+const PROFILE_ID = /^mln[\s-]*([a-z0-9]{4,16})$/i;
+const lawyerLabel = (l) => (l ? `${l.name} · ${l.code}` : '');
+
+Alpine.data('lawyerPicker', ({ url, id, code = '', selected = null, serverError = false }) => ({
+    // `selected` is the confirmed choice ({code, name, city, areas}); `code` is what gets submitted.
+    selected,
+    code: String(code ?? ''),
+    query: selected ? lawyerLabel(selected) : String(code ?? ''),
+    results: [],
+    open: false,
+    active: -1,
+    loading: false,
+    more: false,
+    invalid: false,
+    failed: false,
+    serverError,
+    announcement: '',
+    timer: null,
+    controller: null,
+    lastFetched: null,
+    init() {
+        const form = this.$root.closest('form');
+        if (form) form.addEventListener('submit', (e) => this.onSubmit(e));
+    },
+    showingSelection() { return !!this.selected && this.query === lawyerLabel(this.selected); },
+    // When the box still shows the current choice, list everyone rather than searching for it.
+    term() { return this.showingSelection() ? '' : this.query.trim(); },
+    onInput() {
+        this.invalid = false;
+        this.serverError = false;
+        this.code = this.showingSelection() ? this.selected.code : '';
+        this.open = true;
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => this.search(), 200);
+    },
+    toggle() {
+        if (this.open) { this.close(false); return; }
+        this.open = true;
+        this.search();
+    },
+    async search() {
+        const term = this.term();
+        if (term === this.lastFetched) return;
+        this.controller?.abort();
+        this.controller = new AbortController();
+        this.loading = true;
+        if (!this.results.length) this.announcement = 'Searching…';
+        try {
+            const res = await fetch(url + '?q=' + encodeURIComponent(term), {
+                headers: { Accept: 'application/json' },
+                signal: this.controller.signal,
+            });
+            if (!res.ok) throw new Error(String(res.status));
+            const data = await res.json();
+            this.failed = false;
+            let results = data.results;
+            // Keep the current choice visible at the top of the unfiltered list.
+            if (term === '' && this.selected && !results.some((r) => r.code === this.selected.code)) {
+                results = [this.selected, ...results];
+            }
+            this.results = results;
+            this.more = data.more;
+            this.lastFetched = term;
+            this.active = this.results.findIndex((r) => r.code === this.code);
+            if (this.active < 0 && term && this.results.length) this.active = 0;
+            const n = this.results.length;
+            this.announcement = n
+                ? `${n}${this.more ? '+' : ''} lawyer${n === 1 ? '' : 's'} found. Use up and down arrows to choose.`
+                : 'No approved lawyer matches.';
+        } catch (e) {
+            if (e.name === 'AbortError') return;
+            this.results = [];
+            this.more = false;
+            this.failed = true;
+            this.lastFetched = null;
+            this.announcement = 'Could not load lawyers. Please try again.';
+        } finally {
+            this.loading = false;
+            this.$nextTick(() => this.scrollActive());
+        }
+    },
+    onKeydown(e) {
+        const n = this.results.length;
+        switch (e.key) {
+            case 'ArrowDown':
+            case 'ArrowUp':
+                e.preventDefault();
+                if (!this.open) { this.open = true; this.search(); return; }
+                if (!n || e.altKey) return;
+                this.active = e.key === 'ArrowDown' ? (this.active + 1) % n : (this.active <= 0 ? n - 1 : this.active - 1);
+                this.scrollActive();
+                break;
+            case 'Home':
+            case 'End':
+                if (!this.open || !n) return;
+                e.preventDefault();
+                this.active = e.key === 'Home' ? 0 : n - 1;
+                this.scrollActive();
+                break;
+            case 'Enter':
+                // Pick the highlighted lawyer instead of submitting the form.
+                if (this.open && this.results[this.active]) {
+                    e.preventDefault();
+                    this.choose(this.results[this.active]);
+                }
+                break;
+            case 'Tab':
+                if (this.open && this.results[this.active] && this.term()) {
+                    this.choose(this.results[this.active], false);
+                }
+                break;
+        }
+    },
+    scrollActive() {
+        if (this.active < 0) return;
+        document.getElementById(`${id}_opt_${this.active}`)?.scrollIntoView({ block: 'nearest' });
+    },
+    choose(r, refocus = true) {
+        this.selected = r;
+        this.code = r.code;
+        this.query = lawyerLabel(r);
+        this.invalid = false;
+        this.serverError = false;
+        this.announcement = `${r.name} selected.`;
+        this.close(false);
+        this.lastFetched = null;
+        if (refocus) this.$refs.input.focus();
+    },
+    clear() {
+        this.selected = null;
+        this.code = '';
+        this.query = '';
+        this.invalid = false;
+        this.serverError = false;
+        this.lastFetched = null;
+        this.announcement = 'Assignment cleared. The enquiry will be unassigned when you save.';
+        this.close(false);
+        this.$refs.input.focus();
+    },
+    close(restore) {
+        this.open = false;
+        this.active = -1;
+        // Escape with an unfinished search puts the previous choice back.
+        if (restore && this.selected && !this.showingSelection()) {
+            this.query = lawyerLabel(this.selected);
+            this.code = this.selected.code;
+            this.lastFetched = null;
+        }
+    },
+    onFocusOut(e) {
+        if (this.$root.contains(e.relatedTarget)) return;
+        this.close(false);
+        this.settle();
+    },
+    // Decide what the text in the box means once the user leaves it.
+    settle() {
+        const t = this.query.trim();
+        if (this.showingSelection()) { this.code = this.selected.code; return true; }
+        if (t === '') { this.code = ''; this.selected = null; return true; }
+        // A typed profile ID is still accepted; the server checks it belongs to an approved lawyer.
+        const m = t.match(PROFILE_ID);
+        if (m) { this.code = 'MLN-' + m[1].toUpperCase(); return true; }
+        this.code = '';
+        return false;
+    },
+    onSubmit(e) {
+        if (this.settle()) return;
+        e.preventDefault();
+        this.invalid = true;
+        this.open = true;
+        this.search();
+        this.$refs.input.focus();
+    },
 }));
 
 Alpine.start();

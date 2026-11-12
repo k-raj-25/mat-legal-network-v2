@@ -1,4 +1,4 @@
-<x-layouts.app title="About Us" description="MAT LEGAL NETWORK helps people across India find verified advocates and connect with them privately through one trusted helpline.">
+<x-layouts.app title="About Us" description="MAT LEGAL NETWORK is a law firm that also helps people across India find verified advocates and connect with them privately through one trusted helpline.">
     <x-page-hero eyebrow="About MAT LEGAL NETWORK" title="Making good legal help easy to find." lead="We help people compare verified advocates by city, practice area, language and experience – then connect them through our own team, so nobody's personal number ends up on the internet."/>
     <section class="container-page grid gap-5 md:grid-cols-3">
         @foreach ([
@@ -17,7 +17,7 @@
         <div class="relative overflow-hidden rounded-[32px] bg-ink p-8 text-slate-300 sm:p-12">
             <div class="pointer-events-none absolute -top-20 -right-20 size-72 rounded-full bg-coral-500/25 blur-3xl"></div>
             <h2 class="relative text-3xl text-white">What we are – and what we're not</h2>
-            <p class="relative mt-4 max-w-3xl leading-7">MAT LEGAL NETWORK is an information and connection platform. We are not a law firm, we do not give legal advice and we do not rank lawyers by outcomes. Any engagement, advice and fee is strictly between you and the advocate you choose. Please read our <a href="{{ route('legal', 'disclaimer') }}" class="font-bold text-coral-300 underline underline-offset-2">Disclaimer</a>.</p>
+            <p class="relative mt-4 max-w-3xl leading-7">MAT LEGAL NETWORK is a law firm. Our own advocates give legal advice to clients who engage us, and we also run a network of verified, independent advocates you can search and reach through our team. We do not rank listed lawyers by outcomes. If you engage a listed advocate, the engagement, advice and fee are strictly between you and that advocate. Please read our <a href="{{ route('legal', 'disclaimer') }}" class="font-bold text-coral-300 underline underline-offset-2">Disclaimer</a>.</p>
         </div>
     </section>
 </x-layouts.app>

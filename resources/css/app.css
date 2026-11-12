@@ -101,4 +101,7 @@
     .admin-table th { @apply bg-slate-50/80 px-4 py-3 text-left text-[11px] font-bold tracking-wider text-slate-500 uppercase; }
     .admin-table td { @apply px-4 py-3.5 align-top; }
     .admin-table tbody tr { @apply transition hover:bg-brand-50/40; }
+    /* Whole row opens the record; the name is the real (keyboard-focusable) link. */
+    .admin-table tbody tr.clickable-row { @apply cursor-pointer focus-within:bg-brand-50/60; }
+    .admin-table .row-link { @apply rounded hover:text-brand-700 hover:underline focus-visible:underline; }
 }

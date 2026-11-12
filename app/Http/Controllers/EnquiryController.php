@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EnquiryRequest;
 use App\Models\Enquiry;
 use App\Models\LawyerProfile;
-use App\Notifications\NewEnquiryReceived;
 use App\Rules\PhoneNumber;
+use App\Services\Spam\SpamScreening;
 use App\Support\SpamGuard;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
 class EnquiryController extends Controller
@@ -37,9 +36,8 @@ class EnquiryController extends Controller
             'consented_at' => now(),
         ]);
 
-        if ($to = config('mat.admin.notify_email')) {
-            Notification::route('mail', $to)->notify(new NewEnquiryReceived($enquiry));
-        }
+        // AI spam check (if configured) runs in the background; it sends the admin alert once it is done.
+        SpamScreening::start($enquiry);
 
         return redirect($back)->with('enquiry_success', $enquiry->reference);
     }

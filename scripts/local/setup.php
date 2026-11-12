@@ -102,6 +102,9 @@ function printLogins(): void
     say('  Admin login : '.(config('mat.admin.email') ?: '(set ADMIN_EMAIL in .env)'));
     say('  Password    : '.(config('mat.admin.password') ?: '(set ADMIN_PASSWORD in .env, then run start.bat again)'));
     say('  Demo lawyers: demo.lawyer2@example.com, demo.lawyer3@example.com, ... / password');
+    say('  AI spam     : '.(filled(config('mat.spam_ai.api_key')) && config('mat.spam_ai.enabled')
+        ? 'on ('.config('mat.spam_ai.model').')'
+        : 'off (add ANTHROPIC_API_KEY to .env to turn it on, see README)'));
 }
 
 switch ($command) {

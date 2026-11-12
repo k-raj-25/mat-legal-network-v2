@@ -20,13 +20,17 @@
             <thead><tr><th>Lawyer</th><th>Location</th><th>Enrolment</th><th>Status</th><th>{{ $status === 'pending' ? 'Submitted' : 'Updated' }}</th><th></th></tr></thead>
             <tbody class="divide-y divide-slate-100 bg-white">
                 @forelse ($lawyers as $l)
-                    <tr>
-                        <td><p class="font-medium text-slate-900">{{ $l->full_name }}</p><p class="text-xs text-slate-500">{{ $l->user->email }} · {{ $l->public_code }}</p></td>
+                    <tr data-row-href="{{ route('admin.lawyers.show', $l) }}" data-testid="lawyer-row" class="clickable-row">
+                        <td><a href="{{ route('admin.lawyers.show', $l) }}" class="row-link font-medium text-slate-900" data-testid="lawyer-row-link">{{ $l->full_name }}</a><p class="text-xs text-slate-500">{{ $l->user->email }} · {{ $l->public_code }}</p></td>
                         <td class="text-slate-600">{{ $l->locationLabel() }}</td>
                         <td class="text-slate-600"><p>{{ $l->enrolment_number }}</p><p class="text-xs text-slate-400">since {{ $l->practice_since }}</p></td>
                         <td><x-status-badge :status="$l->status"/></td>
                         <td class="whitespace-nowrap text-slate-500">{{ ($status === 'pending' ? $l->submitted_at : $l->updated_at)?->format('d M Y, H:i') }}</td>
-                        <td class="text-right"><a href="{{ route('admin.lawyers.show', $l) }}" class="btn-outline btn-sm">Review</a></td>
+                        <td class="text-right">
+                            @unless ($l->isPublished())
+                                <a href="{{ route('admin.lawyers.show', $l) }}" class="btn-outline btn-sm">Review</a>
+                            @endunless
+                        </td>
                     </tr>
                 @empty
                     <tr><td colspan="6" class="py-12 text-center text-slate-500">No lawyers found.</td></tr>
