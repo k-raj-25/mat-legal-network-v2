@@ -86,7 +86,7 @@
     <div class="container-page relative grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-5">
         <div class="lg:col-span-2">
             <x-logo light/>
-            <p class="mt-5 max-w-sm text-sm leading-6 text-slate-400">India's growing network of verified advocates. Search freely, then talk to our team – we connect you with the right lawyer while keeping everyone's number private.</p>
+            <p class="mt-5 max-w-sm text-sm leading-6 text-slate-400">A law firm and India's growing network of verified advocates. Search freely, then talk to our team – we connect you with the right lawyer while keeping everyone's number private.</p>
             <div class="mt-6 flex flex-wrap gap-2">
                 <a href="tel:{{ preg_replace('/[^\d+]/', '', $site['company_phone']) }}" class="btn bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/15"><x-icon name="phone" class="size-4"/> {{ $site['company_phone'] }}</a>
                 <a href="https://wa.me/{{ preg_replace('/\D/', '', $site['company_whatsapp']) }}" target="_blank" rel="noopener" class="btn bg-white/10 text-white ring-1 ring-white/15 hover:bg-white/15"><x-icon name="whatsapp" class="size-4"/> WhatsApp</a>
@@ -109,7 +109,7 @@
     <div class="relative border-t border-white/10">
         <div class="container-page flex flex-col gap-3 py-7 text-xs text-slate-500 md:flex-row md:items-center md:justify-between">
             <p class="max-w-3xl">© {{ date('Y') }} {{ $site['legal_entity_name'] }}. All rights reserved. "MAT LEGAL NETWORK", the logo, website design, text, data compilation and software are protected under the Copyright Act, 1957 and applicable trademark laws. Unauthorised copying, scraping or reproduction is prohibited.</p>
-            <p class="shrink-0">MAT LEGAL NETWORK is not a law firm and does not provide legal advice.</p>
+            <p class="max-w-md md:text-right">MAT LEGAL NETWORK is a law firm. Advocates listed in the directory practise independently and are responsible for their own advice.</p>
         </div>
     </div>
 </footer>
@@ -126,8 +126,8 @@
             <p>As per the rules of the Bar Council of India, advocates are not permitted to solicit work or advertise. By clicking <strong>“I agree”</strong>, you confirm that:</p>
             <ul class="list-disc space-y-1 pl-5">
                 <li>You are visiting this website of your own accord to seek information about advocates, and there has been no advertisement, solicitation, invitation or inducement of any sort.</li>
-                <li>Information on this website is provided by the advocates themselves and is for informational purposes only. It is not legal advice.</li>
-                <li>{{ $site['legal_entity_name'] }} is not a law firm and is not responsible for any action taken on the basis of information on this website.</li>
+                <li>Information on this website is general information only and is not legal advice on your matter. Advocate profiles are provided by the advocates themselves.</li>
+                <li>{{ $site['legal_entity_name'] }} is a law firm and gives legal advice only when you engage it for your matter. Advocates listed in the directory practise independently. {{ $site['legal_entity_name'] }} is not responsible for any action taken on the basis of information on this website.</li>
                 <li>We use only essential cookies needed for the website to work. See our <a class="text-brand-700 underline" href="{{ route('legal', 'cookies') }}">Cookie Policy</a>.</li>
             </ul>
         </div>
