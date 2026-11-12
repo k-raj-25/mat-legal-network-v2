@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use Anthropic\Client;
 use App\Models\Setting;
+use App\Services\Spam\AnthropicSpamClassifier;
+use App\Services\Spam\SpamClassifier;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -16,7 +19,15 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->bind(SpamClassifier::class, fn () => new AnthropicSpamClassifier(
+            new Client(
+                apiKey: (string) config('mat.spam_ai.api_key'),
+                baseUrl: config('mat.spam_ai.base_url') ?: null,
+                openTelemetry: false,
+            ),
+            (string) config('mat.spam_ai.model'),
+            (float) config('mat.spam_ai.timeout'),
+        ));
     }
 
     public function boot(): void

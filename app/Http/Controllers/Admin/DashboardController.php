@@ -20,6 +20,7 @@ class DashboardController extends Controller
                 'rejected' => (int) ($byStatus['rejected'] ?? 0),
                 'suspended' => (int) ($byStatus['suspended'] ?? 0),
                 'new_enquiries' => Enquiry::where('status', 'new')->count(),
+                'suspected_spam' => Enquiry::where('status', 'suspected_spam')->count(),
                 'enquiries_week' => Enquiry::where('created_at', '>=', now()->subDays(7))->count(),
                 'unreviewed_changes' => ProfileChangeLog::unreviewed()->count(),
             ],

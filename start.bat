@@ -16,6 +16,9 @@ rem    start.bat reset    wipe the local database, add fresh demo data, start
 rem
 rem  Optional settings (set before running):  MAT_PORT=8000  MAT_NO_BROWSER=1
 rem  MAT_NO_PAUSE=1  MAT_PORTABLE_PHP=1 (always use the private PHP copy)
+rem
+rem  AI spam screening of enquiries (optional): put ANTHROPIC_API_KEY=sk-ant-...
+rem  in .env (never commit it) and run start.bat again. See README.md.
 rem ===========================================================================
 setlocal EnableExtensions DisableDelayedExpansion
 cd /d "%~dp0"

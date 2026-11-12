@@ -28,11 +28,12 @@
             @endif
         </div>
 
-        <aside>
+        <aside class="space-y-6">
+            @include('admin.enquiries._spam-panel')
             <form method="POST" action="{{ route('admin.enquiries.update', $enquiry) }}" class="card space-y-4 p-5" data-testid="enquiry-update">
                 @csrf @method('PUT')
                 <h3 class="text-lg">Follow-up</h3>
-                <x-select name="status" label="Status" :options="collect(\App\Enums\EnquiryStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])" :value="$enquiry->status->value" :placeholder="false"/>
+                <x-select name="status" label="Status" :options="collect($enquiry->status === \App\Enums\EnquiryStatus::SuspectedSpam ? \App\Enums\EnquiryStatus::cases() : \App\Enums\EnquiryStatus::manual())->mapWithKeys(fn ($s) => [$s->value => $s->label()])" :value="$enquiry->status->value" :placeholder="false"/>
                 <x-input name="assigned_code" label="Assign to lawyer (Profile ID)" :value="$enquiry->assignedLawyer?->public_code ?? $enquiry->lawyer?->public_code" placeholder="MLN-XXXXXX" help="{{ $enquiry->assignedLawyer ? 'Currently: '.$enquiry->assignedLawyer->full_name.' · '.$enquiry->assignedLawyer->phone : 'Leave blank if not assigned yet.' }}"/>
                 <x-input name="admin_notes" type="textarea" rows="5" label="Internal notes" :value="$enquiry->admin_notes" maxlength="5000"/>
                 <button class="btn-primary w-full">Save</button>

@@ -35,7 +35,7 @@
 <h2>4. Who we share it with</h2>
 <ul>
     <li><strong>Lawyers:</strong> your enquiry details (name, contact number, city and message) are shared with the Lawyer(s) we connect you with, with your consent.</li>
-    <li><strong>Service providers (Data Processors):</strong> hosting, email delivery and communication providers who process data only on our instructions and under confidentiality obligations.</li>
+    <li><strong>Service providers (Data Processors):</strong> hosting, email delivery and communication providers who process data only on our instructions and under confidentiality obligations. We may also use an AI service provider to screen the text of enquiry messages for spam; your name, phone number, email address and IP address are not shared with it.</li>
     <li><strong>Authorities:</strong> where required by law, court order or a lawful request by a government agency.</li>
     <li><strong>Business transfer:</strong> in a merger, acquisition or sale of assets, subject to this Policy.</li>
 </ul>

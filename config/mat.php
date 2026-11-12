@@ -15,6 +15,18 @@ return [
 
     'per_page' => 12,
 
+    // AI spam screening of new enquiries (Anthropic API). Off unless ANTHROPIC_API_KEY is set.
+    // Fails open: if the key is missing or the API errors / times out, the enquiry is handled as normal.
+    'spam_ai' => [
+        'enabled' => (bool) env('SPAM_AI_ENABLED', true),
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'base_url' => env('SPAM_AI_BASE_URL'), // leave empty; only for proxies and the browser tests' fake API
+        'model' => env('SPAM_AI_MODEL', 'claude-opus-5-5'),
+        // Only verdicts at or above this confidence (0-100) go to the "Suspected spam" queue.
+        'threshold' => (int) env('SPAM_AI_THRESHOLD', 80),
+        'timeout' => (float) env('SPAM_AI_TIMEOUT', 20),
+    ],
+
     // Requests per minute per IP for search/profile pages (anti-scraping).
     'search_rate_limit' => (int) env('SEARCH_RATE_LIMIT', 90),
 
