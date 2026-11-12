@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Enquiry;
 use App\Models\LawyerProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class EnquiryController extends Controller
@@ -33,15 +34,53 @@ class EnquiryController extends Controller
 
     public function show(Enquiry $enquiry)
     {
-        $enquiry->load(['lawyer.city', 'lawyer.practiceAreas', 'assignedLawyer.city', 'assignedLawyer.practiceAreas', 'practiceArea']);
+        $enquiry->load(['lawyer.city', 'lawyer.practiceAreas', 'assignedLawyer.city', 'assignedLawyer.practiceAreas', 'practiceArea', 'spamReviewer:id,name']);
 
         return view('admin.enquiries.show', ['enquiry' => $enquiry]);
+    }
+
+    /**
+     * Admin decision on enquiries the AI held back. Works for one enquiry or a whole page at once.
+     * "spam" confirms it; "not_spam" puts it back in the normal New flow.
+     */
+    public function reviewSpam(Request $request)
+    {
+        $data = $request->validate([
+            'decision' => ['required', Rule::in(['spam', 'not_spam'])],
+            'ids' => ['required', 'array', 'min:1', 'max:100'],
+            'ids.*' => ['integer'],
+        ]);
+        $confirm = $data['decision'] === 'spam';
+
+        $enquiries = Enquiry::whereIn('id', $data['ids'])->where('status', EnquiryStatus::SuspectedSpam->value)->get();
+        if ($enquiries->isEmpty()) {
+            return back()->withErrors(['decision' => 'These enquiries are no longer waiting for a spam review.']);
+        }
+
+        DB::transaction(function () use ($enquiries, $confirm) {
+            foreach ($enquiries as $enquiry) {
+                $enquiry->forceFill([
+                    'status' => $confirm ? EnquiryStatus::Spam : EnquiryStatus::New,
+                    'spam_review' => $confirm ? 'confirmed' : 'not_spam',
+                    'spam_reviewed_by' => auth()->id(),
+                    'spam_reviewed_at' => now(),
+                ])->save();
+                AuditLog::record($confirm ? 'enquiry.spam_confirmed' : 'enquiry.spam_cleared', $enquiry, ['reference' => $enquiry->reference]);
+            }
+        });
+
+        $n = $enquiries->count();
+        $what = $n === 1 ? 'Enquiry '.$enquiries->first()->reference : $n.' enquiries';
+
+        return back()->with('status', $confirm ? "{$what} confirmed as spam." : "{$what} marked not spam and moved to New.");
     }
 
     public function update(Request $request, Enquiry $enquiry)
     {
         $data = $request->validate([
-            'status' => ['required', Rule::enum(EnquiryStatus::class)],
+            'status' => ['required', Rule::enum(EnquiryStatus::class)->only(
+                $enquiry->status === EnquiryStatus::SuspectedSpam ? EnquiryStatus::cases() : EnquiryStatus::manual()
+            )],
             'assigned_code' => ['nullable', 'string', 'max:20'],
             'admin_notes' => ['nullable', 'string', 'max:5000'],
         ]);
@@ -54,7 +93,14 @@ class EnquiryController extends Controller
             }
         }
 
-        $enquiry->status = EnquiryStatus::from($data['status']);
+        $newStatus = EnquiryStatus::from($data['status']);
+        if ($enquiry->status === EnquiryStatus::SuspectedSpam && $newStatus !== EnquiryStatus::SuspectedSpam) {
+            // Moving it out by hand counts as the spam review too.
+            $enquiry->spam_review = $newStatus === EnquiryStatus::Spam ? 'confirmed' : 'not_spam';
+            $enquiry->spam_reviewed_by = auth()->id();
+            $enquiry->spam_reviewed_at = now();
+        }
+        $enquiry->status = $newStatus;
         $enquiry->assigned_lawyer_id = $assigned?->id;
         $enquiry->admin_notes = $data['admin_notes'] ?? null;
         $enquiry->save();

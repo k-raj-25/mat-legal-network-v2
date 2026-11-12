@@ -66,6 +66,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/documents/{document}', [Admin\LawyerController::class, 'document'])->name('documents.show');
 
     Route::get('/enquiries', [Admin\EnquiryController::class, 'index'])->name('enquiries.index');
+    Route::post('/enquiries/spam-review', [Admin\EnquiryController::class, 'reviewSpam'])->name('enquiries.spam-review');
     Route::get('/enquiries/{enquiry}', [Admin\EnquiryController::class, 'show'])->name('enquiries.show');
     Route::put('/enquiries/{enquiry}', [Admin\EnquiryController::class, 'update'])->name('enquiries.update');
 

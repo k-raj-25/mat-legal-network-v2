@@ -13,7 +13,11 @@
             </a>
         @endforeach
     </div>
-    <p class="mt-3 text-sm text-slate-500">{{ $counts['rejected'] }} awaiting lawyer changes · {{ $counts['suspended'] }} suspended · {{ $counts['enquiries_week'] }} enquiries in the last 7 days</p>
+    <p class="mt-3 text-sm text-slate-500">{{ $counts['rejected'] }} awaiting lawyer changes · {{ $counts['suspended'] }} suspended · {{ $counts['enquiries_week'] }} enquiries in the last 7 days
+        @if ($counts['suspected_spam'] > 0)
+            · <a href="{{ route('admin.enquiries.index', ['status' => 'suspected_spam']) }}" class="font-semibold text-amber-700 hover:underline" data-testid="dashboard-suspected-spam">{{ $counts['suspected_spam'] }} suspected spam to review</a>
+        @endif
+    </p>
 
     <div class="mt-8 grid gap-6 xl:grid-cols-2">
         <section class="card overflow-hidden">

@@ -14,7 +14,13 @@ class Enquiry extends Model
         'preferred_contact', 'message', 'ip_address', 'user_agent', 'consented_at',
     ];
 
-    protected $casts = ['status' => EnquiryStatus::class, 'consented_at' => 'datetime'];
+    protected $casts = [
+        'status' => EnquiryStatus::class,
+        'consented_at' => 'datetime',
+        'spam_confidence' => 'integer',
+        'spam_checked_at' => 'datetime',
+        'spam_reviewed_at' => 'datetime',
+    ];
 
     protected static function booted(): void
     {
@@ -39,5 +45,10 @@ class Enquiry extends Model
     public function practiceArea(): BelongsTo
     {
         return $this->belongsTo(PracticeArea::class);
+    }
+
+    public function spamReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'spam_reviewed_by');
     }
 }

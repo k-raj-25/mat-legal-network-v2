@@ -54,6 +54,39 @@ Good to know:
 - **Use MySQL instead of SQLite:** edit `.env` and set `DB_CONNECTION=mysql` plus the `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD` lines (create the database first). The launcher uses whatever `.env` says. Name search uses MySQL FULLTEXT, and a simpler `LIKE` search on SQLite.
 - **Options:** `set MAT_PORT=9000` before running picks another starting port, and `set MAT_NO_BROWSER=1` stops it opening the browser.
 - **Something broke?** Delete the `.tools` and `vendor` folders and run `start.bat` again. To reset your settings too, also delete `.env` and `database\database.sqlite`.
+- **Turn on AI spam screening (optional):** see [AI spam screening](#ai-spam-screening-of-enquiries) below. Paste your key into `.env` as `ANTHROPIC_API_KEY=...` and run `start.bat` again. Without a key the site works exactly as before.
+
+---
+
+## AI spam screening of enquiries
+
+Every new enquiry can be checked by Claude (Anthropic's AI). Enquiries it is confident are spam (SEO pitches, link dropping, scams, gibberish) are **held in Admin › Enquiries › Suspected spam** instead of reaching the New inbox. No new-enquiry alert is sent for them and nobody is assigned. The admin sees the AI's reason and confidence and clicks **Confirm spam** (it moves to Spam) or **Not spam** (it moves back to New), one at a time or for a whole page at once. Nothing is ever deleted.
+
+**Turn it on**
+
+1. Create an API key at [console.anthropic.com](https://console.anthropic.com) › API keys (needs billing set up).
+2. Put it in `.env` (never in Git, never in `.env.example`):
+
+   ```ini
+   ANTHROPIC_API_KEY=sk-ant-...
+   ```
+
+   Locally, run `start.bat` again (or `php artisan config:clear`). On the server, run `php artisan optimize` after editing `.env`.
+
+| Setting | Default | What it does |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | empty | Off when empty. |
+| `SPAM_AI_ENABLED` | `true` | Set `false` to pause screening without removing the key. |
+| `SPAM_AI_MODEL` | `claude-opus-5-5` | Any Claude model. `claude-haiku-5-5` is much cheaper and fast enough for this. |
+| `SPAM_AI_THRESHOLD` | `80` | How sure (0–100) the AI must be before it holds an enquiry back. Raise it if real enquiries get held. |
+| `SPAM_AI_TIMEOUT` | `20` | Seconds to wait for the AI before giving up. |
+
+**Safe by design**
+
+- **Never loses an enquiry.** It is saved first, then checked. If there is no key, or the API fails, times out, refuses or answers nonsense, the enquiry is handled as normal and a warning is written to `storage/logs/laravel.log`.
+- **Doesn't slow the form.** The check runs on the queue (the cron job on the server). Locally (`start.bat`) it runs just after the page has been sent.
+- **Minimal data.** Only the message text, the practice area and the form type are sent. Name, phone, e-mail, city and IP address are never sent.
+- **Prompt-injection resistant.** The message is passed as escaped data with instructions to never obey it, and the answer must match a strict format. The worst a trick message can do is be treated as a normal enquiry.
 
 ---
 
@@ -103,7 +136,7 @@ npm install && npm run build
 
 ## Tests
 
-### 1. Feature & unit tests (65 tests, 668 assertions)
+### 1. Feature & unit tests (110 tests, 1083 assertions)
 
 They run against a real MySQL database, `mat_legal_test` (see `phpunit.xml`):
 
@@ -123,6 +156,18 @@ php artisan cache:clear
 
 ```bash
 BASE_URL=http://127.0.0.1:8000 ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='your-password' node tests/Browser/e2e.cjs
+```
+
+**AI spam screening (15 checks, desktop + iPhone).** Uses a fake Anthropic API (`tests/Browser/fake-anthropic.cjs`), never the real one. Add these lines to `.env`, run `php artisan config:clear`, restart `php artisan serve`, then run the script. Remove the lines afterwards.
+
+```ini
+ANTHROPIC_API_KEY=test-key
+SPAM_AI_BASE_URL=http://127.0.0.1:8787
+QUEUE_CONNECTION=sync
+```
+
+```bash
+node tests/Browser/spam-e2e.cjs
 ```
 
 ### 3. Scalability
@@ -218,5 +263,7 @@ resources/views/legal/*                legal documents
 database/data/*.php                    Indian states/cities, practice areas, languages, courts, bar councils
 tests/Feature, tests/Unit              PHPUnit tests
 tests/Browser/e2e.cjs                  Playwright UI tests
+tests/Browser/spam-e2e.cjs             Playwright checks for AI spam screening (fake AI API)
+app/Services/Spam/                     AI spam screening (classifier, fail-open flow)
 tests/Load/load.cjs                    load test script
 ```
