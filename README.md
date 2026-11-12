@@ -1,6 +1,6 @@
 # MAT LEGAL NETWORK
 
-A directory of verified lawyers (India first, ready to go global later).
+The website of MAT LEGAL NETWORK, a law firm, with a directory of verified lawyers (India first, ready to go global later).
 
 - **Clients** search lawyers by state, city, practice area, name, experience, language, court, gender, fee and online consultation. They **never see a lawyer's phone number**. They contact the company instead, by helpline call, WhatsApp, or a callback request.
 - **Lawyers** register with a 5-step form and upload their Bar enrolment proof and ID. Profiles stay **pending until the admin approves them**. After approval, lawyers can edit their profile. Edits go live immediately and are **logged for the admin to review**.
@@ -136,7 +136,7 @@ npm install && npm run build
 
 ## Tests
 
-### 1. Feature & unit tests (102 tests, 876 assertions)
+### 1. Feature & unit tests (110 tests, 1083 assertions)
 
 They run against a real MySQL database, `mat_legal_test` (see `phpunit.xml`):
 

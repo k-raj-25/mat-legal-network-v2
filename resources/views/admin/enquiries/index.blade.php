@@ -20,19 +20,18 @@
     @else
     <div class="card mt-5 overflow-x-auto">
         <table class="admin-table" data-testid="enquiries-table">
-            <thead><tr><th>Client</th><th>Regarding</th><th>Message</th><th>Status</th><th>Received</th><th></th></tr></thead>
+            <thead><tr><th>Client</th><th>Regarding</th><th>Message</th><th>Status</th><th>Received</th></tr></thead>
             <tbody class="divide-y divide-slate-100 bg-white">
                 @forelse ($enquiries as $e)
-                    <tr>
-                        <td><p class="font-medium text-slate-900">{{ $e->name }}</p><p class="text-xs text-slate-500">{{ $e->phone }} · prefers {{ $e->preferred_contact }}</p></td>
+                    <tr data-row-href="{{ route('admin.enquiries.show', $e) }}" data-testid="enquiry-row" class="clickable-row">
+                        <td><a href="{{ route('admin.enquiries.show', $e) }}" class="row-link font-medium text-slate-900" data-testid="enquiry-row-link">{{ $e->name }}</a><p class="text-xs text-slate-500">{{ $e->phone }} · prefers {{ $e->preferred_contact }}</p></td>
                         <td class="text-slate-600">{{ $e->lawyer ? $e->lawyer->full_name.' ('.$e->lawyer->public_code.')' : ($e->practiceArea?->name ?? 'General') }}</td>
                         <td class="max-w-xs text-slate-600">{{ Str::limit($e->message, 90) }}</td>
                         <td><span class="badge {{ $e->status->badgeClasses() }}">{{ $e->status->label() }}</span>@if ($e->spam_check === 'pending')<span class="mt-1 block text-[11px] text-slate-400">AI check running…</span>@endif</td>
                         <td class="whitespace-nowrap text-slate-500">{{ $e->created_at->format('d M Y, H:i') }}</td>
-                        <td class="text-right"><a href="{{ route('admin.enquiries.show', $e) }}" class="btn-outline btn-sm">Open</a></td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="py-12 text-center text-slate-500">No enquiries found.</td></tr>
+                    <tr><td colspan="5" class="py-12 text-center text-slate-500">No enquiries found.</td></tr>
                 @endforelse
             </tbody>
         </table>
