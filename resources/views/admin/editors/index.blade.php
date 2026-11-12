@@ -10,7 +10,7 @@
         <button class="btn-outline">Search</button>
     </form>
 
-    <div class="card mt-5 overflow-x-auto">
+    <div class="card relative mt-5 overflow-x-auto">
         <table class="admin-table" data-testid="editors-table">
             <thead><tr><th>Editor</th><th>Posts</th><th>Status</th><th>Last sign-in</th><th><span class="sr-only">Actions</span></th></tr></thead>
             <tbody class="divide-y divide-slate-100 bg-white">

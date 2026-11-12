@@ -26,7 +26,7 @@
         </form>
     </div>
 
-    <div class="card mt-5 overflow-x-auto">
+    <div class="card relative mt-5 overflow-x-auto">
         <table class="admin-table" data-testid="posts-table">
             <thead><tr><th>Title</th>@if ($showAll)<th>Author</th>@endif<th>Category</th><th>Status</th><th>Updated</th><th><span class="sr-only">Actions</span></th></tr></thead>
             <tbody class="divide-y divide-slate-100 bg-white">

@@ -1,6 +1,6 @@
 <x-layouts.admin title="Blog categories">
     <div class="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div class="card overflow-x-auto">
+        <div class="card relative overflow-x-auto">
             <table class="admin-table" data-testid="categories-table">
                 <thead><tr><th>Category</th><th>Posts</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
