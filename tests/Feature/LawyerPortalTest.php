@@ -8,6 +8,8 @@ use App\Models\PracticeArea;
 use App\Models\ProfileChangeLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -96,6 +98,71 @@ class LawyerPortalTest extends TestCase
             ->assertSessionHas('status', 'Your profile has been resubmitted for review.');
         $this->assertSame(LawyerStatus::Pending, $l->fresh()->status);
         $this->assertArrayHasKey('status', ProfileChangeLog::sole()->changes);
+    }
+
+    public function test_resubmitted_changes_show_as_collapsed_entry_in_decision_history(): void
+    {
+        Storage::fake('local');
+        Notification::fake();
+        $admin = $this->admin();
+        $l = $this->lawyer(LawyerStatus::Pending, ['education' => 'LL.B.']);
+
+        $this->actingAs($admin)->post("/admin/lawyers/{$l->slug}/status", ['action' => 'reject', 'reason' => 'Please upload a clearer pic']);
+        $this->travel(1)->minutes();
+
+        // Edits before resubmitting are shown as in progress.
+        $this->actingAs($l->user)->put('/lawyer/profile', $this->updatePayload($l, ['education' => 'LL.M.']));
+        $this->actingAs($admin)->get('/admin/lawyers/'.$l->slug)->assertSee('Lawyer is editing (not resubmitted yet)');
+        $this->travel(1)->minutes();
+
+        $this->actingAs($l->user)->put('/lawyer/profile', $this->updatePayload($l->fresh(), [
+            'resubmit' => '1', 'education' => 'LL.M., Ph.D.',
+            'id_proof' => UploadedFile::fake()->create('clear-id.pdf', 50, 'application/pdf'),
+        ]));
+        $this->assertSame(LawyerStatus::Pending, $l->fresh()->status);
+
+        $html = $this->actingAs($admin)->get('/admin/lawyers/'.$l->slug)->assertOk()
+            ->assertSeeInOrder(['Decision history', 'Lawyer made the requested changes', '2 changes', 'Changes requested', 'Please upload a clearer pic'])
+            ->assertDontSee('not resubmitted yet')
+            ->getContent();
+
+        // One collapsed entry (no "open" attribute) that holds the merged diff: first old value, last new value.
+        $this->assertSame(1, substr_count($html, 'data-testid="history-changes"'));
+        $this->assertDoesNotMatchRegularExpression('/<details[^>]*\bopen\b/', $html);
+        $entry = substr($html, strpos($html, 'data-testid="history-changes"'));
+        $entry = substr($entry, 0, strpos($entry, '</details>'));
+        foreach (['Education', 'LL.B.', 'LL.M., Ph.D.', 'Uploaded: ', 'Resubmitted for review'] as $text) {
+            $this->assertStringContainsString($text, $entry);
+        }
+
+        // After approval, ordinary edits stay out of the decision history.
+        $this->travel(1)->minutes();
+        $this->post("/admin/lawyers/{$l->slug}/status", ['action' => 'approve']);
+        $this->travel(1)->minutes();
+        $this->actingAs($l->user)->put('/lawyer/profile', $this->updatePayload($l->fresh(), ['education' => 'LL.M., Ph.D., LL.D.']));
+        $html = $this->actingAs($admin)->get('/admin/lawyers/'.$l->slug)->getContent();
+        $this->assertSame(1, substr_count($html, 'data-testid="history-changes"'));
+        $this->assertStringContainsString('LL.D.', $html); // still listed in Profile change history
+    }
+
+    public function test_decision_history_handles_many_review_rounds(): void
+    {
+        Notification::fake();
+        $admin = $this->admin();
+        $l = $this->lawyer(LawyerStatus::Pending);
+        for ($i = 1; $i <= 15; $i++) {
+            $this->actingAs($admin)->post("/admin/lawyers/{$l->slug}/status", ['action' => 'reject', 'reason' => "Round $i"]);
+            $this->travel(1)->minutes();
+            $this->actingAs($l->user)->put('/lawyer/profile', $this->updatePayload($l->fresh(), ['resubmit' => '1', 'education' => "Edu $i"]));
+            $this->travel(1)->minutes();
+        }
+        DB::enableQueryLog();
+        $start = microtime(true);
+        $html = $this->actingAs($admin)->get('/admin/lawyers/'.$l->slug)->assertOk()->getContent();
+        $this->assertLessThan(2.0, microtime(true) - $start);
+        $this->assertLessThan(40, count(DB::getQueryLog()));
+        $this->assertSame(15, substr_count($html, 'data-testid="history-changes"'));
+        $this->assertSame(15, substr_count($html, 'Lawyer made the requested changes'));
     }
 
     public function test_lawyer_cannot_change_own_status_or_feature_flag(): void

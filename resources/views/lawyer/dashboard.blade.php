@@ -23,7 +23,7 @@
                     <a href="{{ route('lawyers.show', $lawyer->slug) }}" target="_blank" class="btn-outline mt-4"><x-icon name="eye" class="size-4"/> View public profile</a>
                     @break
                 @case(LawyerStatus::Rejected)
-                    <div class="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+                    <div class="mt-3 rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-900" data-testid="changes-requested">
                         <p class="font-semibold">Our team requested changes:</p>
                         <p class="mt-1">{{ $lawyer->status_reason }}</p>
                     </div>

@@ -7,8 +7,8 @@
                     <tr>
                         <td class="whitespace-nowrap text-slate-500">{{ $log->created_at->format('d M Y, H:i') }}</td>
                         <td>{{ $log->user?->name ?? 'System' }}</td>
-                        <td class="font-mono text-xs">{{ $log->action }}</td>
-                        <td class="max-w-md text-xs text-slate-600">{{ collect($log->meta)->map(fn ($v, $k) => $k.': '.(is_array($v) ? implode(', ', $v) : var_export($v, true)))->implode(' · ') }}</td>
+                        <td><span class="font-medium text-slate-800">{{ $log->label() }}</span><span class="block font-mono text-[11px] text-slate-400">{{ $log->action }}</span></td>
+                        <td class="max-w-md text-xs text-slate-600">{{ $log->metaSummary() }}</td>
                         <td class="text-xs text-slate-400">{{ $log->ip_address }}</td>
                     </tr>
                 @empty

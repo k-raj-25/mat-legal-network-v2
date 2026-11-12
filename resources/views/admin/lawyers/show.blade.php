@@ -85,7 +85,7 @@
                     <div x-show="action === 'reject' || action === 'suspend'" x-cloak>
                         <x-input name="reason" type="textarea" rows="3" label="Reason (emailed to the lawyer)" maxlength="1000" placeholder="e.g. The enrolment certificate is not readable. Please upload a clearer copy."/>
                     </div>
-                    <button class="btn w-full py-3 text-white" :class="action === 'suspend' || action === 'reject' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-brand-600 hover:bg-brand-700'" data-testid="review-submit">Confirm</button>
+                    <button class="btn w-full py-3 text-white" :class="action === 'suspend' ? 'bg-rose-600 hover:bg-rose-700' : (action === 'reject' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-brand-600 hover:bg-brand-700')" data-testid="review-submit">Confirm</button>
                 </form>
             </section>
 
@@ -116,7 +116,22 @@
                 <h3 class="text-lg">Decision history</h3>
                 <ol class="mt-3 space-y-3 text-sm">
                     @forelse ($history as $h)
-                        <li class="border-l-2 border-slate-200 pl-3"><p class="font-medium text-slate-800">{{ Str::of($h->action)->after('.')->replace('_', ' ')->ucfirst() }}</p><p class="text-xs text-slate-500">{{ $h->created_at->format('d M Y, H:i') }} · {{ $h->user?->name }}</p>@if ($h->meta['reason'] ?? null)<p class="mt-1 text-xs text-slate-600">“{{ $h->meta['reason'] }}”</p>@endif</li>
+                        @if ($h['type'] === 'changes')
+                            <li class="border-l-2 border-emerald-300 pl-3" data-testid="history-changes">
+                                <details class="group">
+                                    <summary class="flex cursor-pointer list-none items-start justify-between gap-2 rounded-lg [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:outline-brand-600">
+                                        <span class="min-w-0">
+                                            <span class="block font-medium text-slate-800">{{ $h['label'] }}</span>
+                                            <span class="block text-xs text-slate-500">{{ $h['at']->format('d M Y, H:i') }} · {{ $h['by'] ?? 'Lawyer' }} · {{ $h['count'] }} {{ Str::plural('change', $h['count']) }}</span>
+                                        </span>
+                                        <span class="mt-0.5 shrink-0 text-xs font-semibold text-brand-700"><span class="group-open:hidden">Show</span><span class="hidden group-open:inline">Hide</span><svg class="ml-0.5 inline size-3 transition group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4Z"/></svg></span>
+                                    </summary>
+                                    <div class="mt-1" data-testid="history-changes-diff">@include('admin.changes._diff', ['changes' => $h['changes'], 'stacked' => true])</div>
+                                </details>
+                            </li>
+                        @else
+                            <li class="border-l-2 border-slate-200 pl-3" data-testid="history-item"><p class="font-medium text-slate-800">{{ $h['label'] }}</p><p class="text-xs text-slate-500">{{ $h['at']->format('d M Y, H:i') }} · {{ $h['by'] }}</p>@if ($h['reason'])<p class="mt-1 text-xs text-slate-600">“{{ $h['reason'] }}”</p>@endif</li>
+                        @endif
                     @empty
                         <li class="text-slate-500">No decisions yet.</li>
                     @endforelse

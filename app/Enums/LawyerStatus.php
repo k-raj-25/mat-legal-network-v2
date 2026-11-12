@@ -25,7 +25,7 @@ enum LawyerStatus: string
         return match ($this) {
             self::Pending => 'bg-amber-50 text-amber-800 ring-amber-200',
             self::Approved => 'bg-emerald-50 text-emerald-800 ring-emerald-200',
-            self::Rejected => 'bg-rose-50 text-rose-800 ring-rose-200',
+            self::Rejected => 'bg-orange-50 text-orange-800 ring-orange-200',
             self::Suspended => 'bg-slate-100 text-slate-700 ring-slate-300',
         };
     }

@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\LawyerDocument;
 use App\Models\LawyerProfile;
 use App\Services\LawyerReviewService;
+use App\Support\DecisionTimeline;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -50,7 +51,7 @@ class LawyerController extends Controller
         $lawyer->load(['user', 'country', 'state', 'city', 'practiceAreas', 'languages', 'courts', 'documents', 'reviewer', 'changeLogs.user']);
         $history = AuditLog::where('subject_type', LawyerProfile::class)->where('subject_id', $lawyer->id)->with('user')->latest()->get();
 
-        return view('admin.lawyers.show', ['lawyer' => $lawyer, 'history' => $history]);
+        return view('admin.lawyers.show', ['lawyer' => $lawyer, 'history' => DecisionTimeline::build($history, $lawyer->changeLogs)]);
     }
 
     public function updateStatus(Request $request, LawyerProfile $lawyer, LawyerReviewService $review)
