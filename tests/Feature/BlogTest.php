@@ -126,6 +126,31 @@ class BlogTest extends TestCase
         $this->get('/blog/sanitised-article')->assertOk()->assertDontSee('<script>alert(1)</script>', false);
     }
 
+    protected function tearDown(): void
+    {
+        HtmlSanitizer::$forceFallback = false;
+        parent::tearDown();
+    }
+
+    /** Regression: without the HTML Purifier package (vendor not updated) saving a post gave a 500. */
+    public function test_posts_save_safely_without_the_html_purifier_package(): void
+    {
+        HtmlSanitizer::$forceFallback = true;
+        $this->actingAs($this->editor());
+        $dirty = '<h1>Big</h1><p onclick="alert(1)" style="color:red">Hi <script>alert(1)</script><a href=" JaVa&#x09;script:alert(1)">bad</a> <a href="https://example.com" onmouseover="x()">good</a></p>'
+            .'<img src=x onerror=alert(1)><iframe src="https://evil.test"></iframe><div>Line from a div</div><ul><li><strong>ok</strong></li></ul><style>body{}</style><!-- note --><a href="data:text/html,x">d</a> ü €';
+        $this->post('/admin/posts', ['title' => 'Fallback article', 'body' => $dirty, 'action' => 'publish'])->assertSessionHasNoErrors()->assertRedirect();
+
+        $body = Post::where('title', 'Fallback article')->value('body');
+        foreach (['<script', 'alert(1)', 'onclick', 'onerror', 'onmouseover', 'javascript', 'data:', '<iframe', '<img', 'style', '<h1', '<div', '<!--'] as $bad) {
+            $this->assertStringNotContainsStringIgnoringCase($bad, $body);
+        }
+        foreach (['<h2>Big</h2>', 'href="https://example.com"', '<strong>ok</strong>', '<p>Line from a div</p>', 'ü €'] as $good) {
+            $this->assertStringContainsString($good, $body);
+        }
+        $this->get('/blog/fallback-article')->assertOk();
+    }
+
     public function test_sanitizer_unit_cases(): void
     {
         $this->assertSame('', HtmlSanitizer::clean('<p> </p><p><br></p>'));
