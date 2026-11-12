@@ -22,7 +22,7 @@
 
 <h2>2. Why we use it (purposes)</h2>
 <ul>
-    <li><strong>Users:</strong> to respond to your enquiry, understand your need, and share your request with suitable Lawyers so they can assist you.</li>
+    <li><strong>Users:</strong> to respond to your enquiry, understand your need, advise you where you engage us for your matter, and share your request with suitable Lawyers so they can assist you.</li>
     <li><strong>Lawyers:</strong> to verify your enrolment and identity, publish your public profile, pass on client enquiries, communicate with you about your account, and maintain an audit trail of profile changes.</li>
     <li><strong>Everyone:</strong> to secure the Platform, prevent spam, fraud and scraping, comply with law, and improve our services.</li>
 </ul>
