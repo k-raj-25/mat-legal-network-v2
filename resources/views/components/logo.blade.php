@@ -11,8 +11,10 @@
         <path d="M11 14l-3.6 7.2a3.6 3.6 0 0 0 7.2 0L11 14ZM29 14l-3.6 7.2a3.6 3.6 0 0 0 7.2 0L29 14Z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
         <circle cx="33" cy="7" r="4.5" fill="#ff5a45" stroke="{{ $light ? '#0b1324' : '#fff' }}" stroke-width="2"/>
     </svg>
-    <span class="leading-none">
-        <span class="block font-display text-[17px] font-extrabold tracking-[-0.03em] {{ $light ? 'text-white' : 'text-ink' }}">MAT Legal</span>
-        <span class="mt-0.5 block text-[10px] font-bold tracking-[0.28em] {{ $light ? 'text-brand-300' : 'text-brand-600' }}">NETWORK</span>
+    {{-- The text block is as wide as "MAT Legal"; NETWORK's letters are spread edge to edge
+         so its K ends exactly under the final L, whatever font the browser renders. --}}
+    <span class="inline-block leading-none">
+        <span class="block whitespace-nowrap font-display text-[17px] font-extrabold tracking-[-0.03em] {{ $light ? 'text-white' : 'text-ink' }}">MAT Legal</span>
+        <span class="relative mt-0.5 block text-[10px] font-bold {{ $light ? 'text-brand-300' : 'text-brand-600' }}"><span class="sr-only">NETWORK</span><span class="flex justify-between" aria-hidden="true"><span>N</span><span>E</span><span>T</span><span>W</span><span>O</span><span>R</span><span>K</span></span></span>
     </span>
 </span>
