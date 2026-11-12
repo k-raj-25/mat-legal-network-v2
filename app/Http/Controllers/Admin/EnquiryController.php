@@ -33,7 +33,7 @@ class EnquiryController extends Controller
 
     public function show(Enquiry $enquiry)
     {
-        $enquiry->load(['lawyer.city', 'assignedLawyer.city', 'practiceArea']);
+        $enquiry->load(['lawyer.city', 'lawyer.practiceAreas', 'assignedLawyer.city', 'assignedLawyer.practiceAreas', 'practiceArea']);
 
         return view('admin.enquiries.show', ['enquiry' => $enquiry]);
     }
