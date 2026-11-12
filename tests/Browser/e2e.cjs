@@ -361,6 +361,30 @@ function makeFiles() {
         await ctx.close();
     });
 
+    await step('[flow] admin sidebar View site / Log out stay visible on long pages', async () => {
+        const inView = (page) => page.evaluate(() => ['View site', 'Log out'].every((t) => {
+            const el = [...document.querySelectorAll('aside a, aside button')].find((e) => e.textContent.trim() === t);
+            const r = el.getBoundingClientRect();
+            return r.top >= 0 && r.bottom <= innerHeight && el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+        }));
+        await ap.goto('/admin/lawyers?status=approved');
+        assert(await inView(ap), 'desktop sidebar footer not visible at top of a long page');
+        await ap.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight / 2));
+        assert(await inView(ap), 'desktop sidebar footer not visible mid-way down a long page');
+        const { ctx, page } = await newPage(browser, { ...devices['iPhone SE'] }, 'admin-mobile-sidebar');
+        await page.goto('/login');
+        await page.fill('#f_email', ADMIN_EMAIL);
+        await page.fill('#f_password', ADMIN_PASSWORD);
+        await page.getByRole('button', { name: 'Log in' }).click();
+        await page.waitForURL(/\/admin$/);
+        await page.goto('/admin/lawyers?status=approved');
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        await page.getByRole('button', { name: 'Open menu' }).click();
+        await page.waitForTimeout(300);
+        assert(await inView(page), 'mobile sidebar footer not visible');
+        await ctx.close();
+    });
+
     await step('[flow] no JavaScript errors in flows', async () => {
         assert(lp.errors.length === 0 && ap.errors.length === 0, [...lp.errors, ...ap.errors].join(' | '));
     });

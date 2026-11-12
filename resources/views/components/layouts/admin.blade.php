@@ -23,10 +23,10 @@
 <body class="bg-slate-50" x-data="{ nav: false }">
 <div class="lg:grid lg:min-h-screen lg:grid-cols-[250px_1fr]">
     <div class="fixed inset-0 z-40 bg-ink/50 backdrop-blur-sm lg:hidden" x-show="nav" x-cloak @click="nav = false"></div>
-    <aside class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col overflow-hidden bg-ink text-slate-300 transition-transform lg:static lg:w-auto lg:translate-x-0" :class="nav ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+    <aside class="fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-col overflow-hidden bg-ink text-slate-300 transition-transform lg:sticky lg:top-0 lg:w-auto lg:translate-x-0" data-testid="admin-sidebar" :class="nav ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         <div class="pointer-events-none absolute -bottom-24 -left-24 size-72 rounded-full bg-brand-500/20 blur-3xl"></div>
-        <div class="relative flex h-[72px] items-center px-5"><a href="{{ route('admin.dashboard') }}"><x-logo light/></a></div>
-        <nav class="relative flex-1 space-y-1 px-3 py-4" aria-label="Admin">
+        <div class="relative flex h-[72px] shrink-0 items-center px-5"><a href="{{ route('admin.dashboard') }}"><x-logo light/></a></div>
+        <nav class="relative min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4" aria-label="Admin">
             @foreach ($nav as [$route, $label, $icon, $count])
                 @php $active = request()->routeIs($route) || (substr_count($route, '.') >= 2 && request()->routeIs(Str::beforeLast($route, '.').'.*')); @endphp
                 <a href="{{ route($route) }}" class="flex items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-bold transition {{ $active ? 'bg-white text-ink' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
@@ -35,7 +35,7 @@
                 </a>
             @endforeach
         </nav>
-        <div class="relative border-t border-white/10 p-4 text-sm">
+        <div class="relative shrink-0 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-sm" data-testid="admin-sidebar-footer">
             <p class="truncate text-white">{{ auth()->user()->name }}</p>
             <p class="truncate text-xs text-slate-400">{{ auth()->user()->email }}</p>
             <div class="mt-3 flex gap-2">
