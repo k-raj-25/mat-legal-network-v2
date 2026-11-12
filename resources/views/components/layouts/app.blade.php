@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null, 'noindex' => false, 'canonical' => null, 'disclaimer' => true])
+@props(['title' => null, 'description' => null, 'noindex' => false, 'canonical' => null, 'disclaimer' => true, 'ogType' => 'website', 'ogImage' => null])
 @php
     $fullTitle = $title ? $title.' | MAT LEGAL NETWORK' : 'MAT LEGAL NETWORK – Find Verified Lawyers Near You';
     $description = $description ?? 'Search verified lawyers across India by city, practice area, language and experience. Connect through MAT LEGAL NETWORK – one trusted number, no spam.';
@@ -18,7 +18,8 @@
     <meta property="og:site_name" content="MAT LEGAL NETWORK">
     <meta property="og:title" content="{{ $fullTitle }}">
     <meta property="og:description" content="{{ $description }}">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ $ogType }}">
+    @if ($ogImage)<meta property="og:image" content="{{ $ogImage }}"><meta name="twitter:card" content="summary_large_image">@endif
     <meta property="og:url" content="{{ $canonical ?? url()->current() }}">
     <meta name="copyright" content="© {{ date('Y') }} {{ $site['legal_entity_name'] }}. All rights reserved.">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
@@ -33,8 +34,8 @@
         <a href="{{ route('home') }}" aria-label="MAT LEGAL NETWORK home"><x-logo/></a>
 
         <nav class="hidden items-center gap-1 rounded-full bg-slate-100/80 p-1 lg:flex" aria-label="Main">
-            @foreach ([['lawyers.index', 'Find a Lawyer'], ['for-lawyers', 'For Lawyers'], ['about', 'About'], ['contact', 'Contact']] as [$r, $l])
-                <a href="{{ route($r) }}" class="rounded-full px-4 py-2 text-sm font-bold transition {{ request()->routeIs($r.'*') ? 'bg-white text-ink shadow-pop' : 'text-slate-600 hover:text-ink' }}">{{ $l }}</a>
+            @foreach ([['lawyers.index', 'Find a Lawyer'], ['for-lawyers', 'For Lawyers'], ['blog.index', 'Blog'], ['about', 'About'], ['contact', 'Contact']] as [$r, $l])
+                <a href="{{ route($r) }}" class="rounded-full px-4 py-2 text-sm font-bold transition {{ request()->routeIs($r === 'blog.index' ? 'blog.*' : $r.'*') ? 'bg-white text-ink shadow-pop' : 'text-slate-600 hover:text-ink' }}" @if (request()->routeIs($r)) aria-current="page" @endif>{{ $l }}</a>
             @endforeach
         </nav>
 
@@ -59,7 +60,7 @@
 
     <div id="mobile-menu" x-show="open" x-cloak x-transition.origin.top class="border-t border-slate-100 bg-white shadow-pop-lg lg:hidden">
         <nav class="container-page grid gap-1 py-4" aria-label="Mobile">
-            @foreach ([['lawyers.index', 'Find a Lawyer', 'search'], ['for-lawyers', 'For Lawyers', 'briefcase'], ['about', 'About', 'info'], ['contact', 'Contact', 'chat']] as [$r, $l, $i])
+            @foreach ([['lawyers.index', 'Find a Lawyer', 'search'], ['for-lawyers', 'For Lawyers', 'briefcase'], ['blog.index', 'Blog', 'newspaper'], ['about', 'About', 'info'], ['contact', 'Contact', 'chat']] as [$r, $l, $i])
                 <a href="{{ route($r) }}" class="flex items-center gap-3 rounded-2xl px-3 py-3 text-base font-bold text-ink hover:bg-slate-50"><span class="tile size-9 bg-brand-50 text-brand-600"><x-icon :name="$i" class="size-5"/></span>{{ $l }}</a>
             @endforeach
             <div class="mt-3 grid gap-2 border-t border-slate-100 pt-4">
@@ -94,7 +95,7 @@
             <a href="mailto:{{ $site['company_email'] }}" class="mt-4 inline-flex items-center gap-2 text-sm hover:text-white"><x-icon name="mail" class="size-4 text-brand-300"/> {{ $site['company_email'] }}</a>
         </div>
         @foreach ([
-            'Explore' => [[route('lawyers.index'), 'Find a lawyer'], [route('lawyers.index', ['area' => 'criminal-law']), 'Criminal lawyers'], [route('lawyers.index', ['area' => 'family-divorce']), 'Divorce lawyers'], [route('lawyers.index', ['area' => 'property-real-estate']), 'Property lawyers'], [route('about'), 'About us'], [route('contact'), 'Contact']],
+            'Explore' => [[route('lawyers.index'), 'Find a lawyer'], [route('lawyers.index', ['area' => 'criminal-law']), 'Criminal lawyers'], [route('lawyers.index', ['area' => 'family-divorce']), 'Divorce lawyers'], [route('lawyers.index', ['area' => 'property-real-estate']), 'Property lawyers'], [route('blog.index'), 'Blog'], [route('about'), 'About us'], [route('contact'), 'Contact']],
             'For lawyers' => [[route('for-lawyers'), 'Why join'], [route('register'), 'Register free'], [route('login'), 'Lawyer log in'], [route('legal', 'lawyer-terms'), 'Listing terms']],
             'Legal' => collect(\App\Http\Controllers\PageController::LEGAL)->except('lawyer-terms')->map(fn ($l, $s) => [route('legal', $s), $l])->values()->all(),
         ] as $heading => $links)

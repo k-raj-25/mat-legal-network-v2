@@ -10,13 +10,22 @@ class SitemapController extends Controller
     public function __invoke()
     {
         $xml = Cache::remember('sitemap.xml', 3600, function () {
-            $urls = [route('home'), route('lawyers.index'), route('about'), route('for-lawyers'), route('contact')];
+            $urls = [route('home'), route('lawyers.index'), route('blog.index'), route('about'), route('for-lawyers'), route('contact')];
             foreach (array_keys(PageController::LEGAL) as $p) {
                 $urls[] = route('legal', $p);
             }
             DB::table('practice_areas')->where('is_active', true)->orderBy('id')->pluck('slug')
                 ->each(function ($s) use (&$urls) {
                     $urls[] = route('lawyers.index', ['area' => $s]);
+                });
+            // Blog: categories and the newest published posts (4k + 45k profiles stays under the 50k-URL limit).
+            DB::table('blog_categories')->where('is_active', true)->orderBy('id')->pluck('slug')
+                ->each(function ($s) use (&$urls) {
+                    $urls[] = route('blog.category', $s);
+                });
+            DB::table('posts')->where('status', 'published')->whereNotNull('published_at')->orderByDesc('published_at')->limit(4000)->pluck('slug')
+                ->each(function ($s) use (&$urls) {
+                    $urls[] = route('blog.show', $s);
                 });
             // Profiles (capped at the 50k-URL sitemap limit).
             DB::table('lawyer_profiles')->where('status', 'approved')->orderBy('id')->limit(45000)->pluck('slug')

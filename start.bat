@@ -147,6 +147,7 @@ echo  ---------------------------------------------------------------
 echo   Site   : http://127.0.0.1:%PORT%
 echo   Login  : http://127.0.0.1:%PORT%/login
 echo   Admin  : http://127.0.0.1:%PORT%/admin
+echo   Blog   : http://127.0.0.1:%PORT%/blog   (editor login: editor@example.com / Editor@12345)
 echo   E-mails are written to storage\logs\laravel.log
 echo   Press Ctrl+C in this window to stop the site.
 echo  ---------------------------------------------------------------

@@ -307,4 +307,91 @@ Alpine.data('lawyerPicker', ({ url, id, code = '', selected = null, serverError 
     },
 }));
 
+/**
+ * Small rich text editor for blog posts (contenteditable + a toolbar).
+ * The HTML is mirrored into a <textarea name="body">; the server sanitises it again with an allow-list.
+ * Without JavaScript the textarea is shown instead.
+ */
+Alpine.data('richText', () => ({
+    ready: false,
+    words: 0,
+    active: {},
+    init() {
+        const ed = this.$refs.editor;
+        ed.innerHTML = this.$refs.field.value;
+        try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (e) { /* older browsers */ }
+        if (!ed.innerHTML.trim()) ed.innerHTML = '<p><br></p>';
+        this.ready = true;
+        this.count();
+        document.addEventListener('selectionchange', () => { if (document.activeElement === ed) this.refresh(); });
+        // Keep the textarea current even if the editor is never blurred.
+        this.$refs.field.form?.addEventListener('submit', () => this.sync());
+    },
+    focus() { this.$refs.editor.focus(); },
+    sync() {
+        const html = this.$refs.editor.innerHTML;
+        this.$refs.field.value = /^(<p>(<br>)?<\/p>|<br>)?$/.test(html.trim()) ? '' : html;
+        this.count();
+    },
+    count() {
+        const text = this.$refs.editor.innerText || '';
+        this.words = (text.trim().match(/\S+/g) || []).length;
+    },
+    refresh() {
+        const block = (document.queryCommandValue('formatBlock') || '').toLowerCase();
+        const a = {};
+        for (const c of ['bold', 'italic', 'insertUnorderedList', 'insertOrderedList']) {
+            try { a[c] = document.queryCommandState(c); } catch (e) { a[c] = false; }
+        }
+        for (const b of ['p', 'h2', 'h3', 'blockquote']) a[b] = block === b;
+        this.active = a;
+    },
+    run(kind, value) {
+        this.focus();
+        if (kind === 'block') {
+            // Clicking an active heading/quote again turns it back into a paragraph.
+            document.execCommand('formatBlock', false, this.active[value] && value !== 'p' ? 'p' : value);
+        } else if (kind === 'link') {
+            const sel = window.getSelection();
+            if (!sel || sel.isCollapsed) { window.alert('Select the words you want to turn into a link first.'); return; }
+            const range = sel.getRangeAt(0);
+            let url = (window.prompt('Link address (https://…, mailto: or tel:)', 'https://') || '').trim();
+            if (!url || url === 'https://') return;
+            if (!/^(https?:|mailto:|tel:|\/)/i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
+            sel.removeAllRanges(); sel.addRange(range);
+            document.execCommand('createLink', false, url);
+        } else {
+            document.execCommand(value, false, null);
+        }
+        this.sync();
+        this.refresh();
+    },
+    paste(e) {
+        // Paste as plain text so formatting from Word or web pages doesn't come along.
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        const html = text.split(/\r?\n\s*\r?\n/).map((para) => para
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/\r?\n/g, '<br>')).join('</p><p>');
+        document.execCommand(text.includes('\n') ? 'insertHTML' : 'insertText', false, text.includes('\n') ? '<p>' + html + '</p>' : text);
+        this.sync();
+    },
+    // Arrow keys move between toolbar buttons (one tab stop for the whole toolbar).
+    toolbarKeys(e) {
+        const btns = [...this.$root.querySelectorAll('[data-tool]')];
+        const i = btns.indexOf(document.activeElement);
+        if (i < 0) return;
+        let n = null;
+        if (e.key === 'ArrowRight') n = (i + 1) % btns.length;
+        else if (e.key === 'ArrowLeft') n = (i - 1 + btns.length) % btns.length;
+        else if (e.key === 'Home') n = 0;
+        else if (e.key === 'End') n = btns.length - 1;
+        if (n === null) return;
+        e.preventDefault();
+        btns[i].tabIndex = -1;
+        btns[n].tabIndex = 0;
+        btns[n].focus();
+    },
+}));
+
 Alpine.start();

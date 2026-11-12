@@ -1,14 +1,22 @@
 @props(['title'])
 @php
-    $nav = [
+    // Editors only ever see the blog. Badge counts are not even queried for them.
+    $nav = auth()->user()->isAdmin() ? [
         ['admin.dashboard', 'Dashboard', 'home', null],
         ['admin.lawyers.index', 'Lawyers', 'users', \App\Models\LawyerProfile::where('status', 'pending')->count()],
         ['admin.enquiries.index', 'Enquiries', 'inbox', \App\Models\Enquiry::where('status', 'new')->count()],
         ['admin.changes.index', 'Profile changes', 'list', \App\Models\ProfileChangeLog::whereNull('reviewed_at')->count()],
+        ['admin.posts.index', 'Blog posts', 'pencil', null],
+        ['admin.blog-categories.index', 'Blog categories', 'tag', null],
+        ['admin.editors.index', 'Blog editors', 'user', null],
         ['admin.masters.index', 'Lists & filters', 'filter', null],
         ['admin.settings.edit', 'Settings', 'cog', null],
         ['admin.audit', 'Audit log', 'shield', null],
+    ] : [
+        ['admin.posts.index', 'My blog posts', 'pencil', null],
+        ['admin.account.edit', 'My account', 'lock', null],
     ];
+    $panel = auth()->user()->isAdmin() ? 'Admin' : 'Blog editor';
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +24,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ $title }} · Admin · MAT LEGAL NETWORK</title>
+    <title>{{ $title }} · {{ $panel }} · MAT LEGAL NETWORK</title>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -25,8 +33,8 @@
     <div class="fixed inset-0 z-40 bg-ink/50 backdrop-blur-sm lg:hidden" x-show="nav" x-cloak @click="nav = false"></div>
     <aside class="fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-col overflow-hidden bg-ink text-slate-300 transition-transform lg:sticky lg:top-0 lg:w-auto lg:translate-x-0" data-testid="admin-sidebar" :class="nav ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         <div class="pointer-events-none absolute -bottom-24 -left-24 size-72 rounded-full bg-brand-500/20 blur-3xl"></div>
-        <div class="relative flex h-[72px] shrink-0 items-center px-5"><a href="{{ route('admin.dashboard') }}"><x-logo light/></a></div>
-        <nav class="relative min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4" aria-label="Admin">
+        <div class="relative flex h-[72px] shrink-0 items-center px-5"><a href="{{ auth()->user()->homeRoute() }}"><x-logo light/></a></div>
+        <nav class="relative min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4" aria-label="{{ $panel }}">
             @foreach ($nav as [$route, $label, $icon, $count])
                 @php $active = request()->routeIs($route) || (substr_count($route, '.') >= 2 && request()->routeIs(Str::beforeLast($route, '.').'.*')); @endphp
                 <a href="{{ route($route) }}" class="flex items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-bold transition {{ $active ? 'bg-white text-ink' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
@@ -38,6 +46,7 @@
         <div class="relative shrink-0 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-sm" data-testid="admin-sidebar-footer">
             <p class="truncate text-white">{{ auth()->user()->name }}</p>
             <p class="truncate text-xs text-slate-400">{{ auth()->user()->email }}</p>
+            @if (auth()->user()->isAdmin())<a href="{{ route('admin.account.edit') }}" class="mt-1 inline-block text-xs font-semibold text-brand-300 hover:text-white">Change my password</a>@endif
             <div class="mt-3 flex gap-2">
                 <a href="{{ route('home') }}" target="_blank" class="btn btn-sm bg-white/10 text-white hover:bg-white/20">View site</a>
                 <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn btn-sm bg-white/10 text-white hover:bg-white/20">Log out</button></form>

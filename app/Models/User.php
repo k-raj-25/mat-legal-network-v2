@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Role;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -37,6 +38,11 @@ class User extends Authenticatable
         return $this->hasOne(LawyerProfile::class);
     }
 
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === Role::Admin;
@@ -47,8 +53,17 @@ class User extends Authenticatable
         return $this->role === Role::Lawyer;
     }
 
+    public function isEditor(): bool
+    {
+        return $this->role === Role::Editor;
+    }
+
     public function homeRoute(): string
     {
-        return $this->isAdmin() ? route('admin.dashboard') : route('lawyer.dashboard');
+        return match ($this->role) {
+            Role::Admin => route('admin.dashboard'),
+            Role::Editor => route('admin.posts.index'),
+            default => route('lawyer.dashboard'),
+        };
     }
 }

@@ -96,12 +96,23 @@ function seedDemoIfEmpty(): void
     artisan('db:seed', ['--class' => 'Database\\Seeders\\DemoSeeder', '--force' => true]);
 }
 
+/** Older local databases got demo lawyers before the blog existed: add the demo editor and sample posts once. */
+function seedBlogDemoIfMissing(): void
+{
+    if (DB::table('users')->where('email', 'editor@example.com')->exists()) {
+        return;
+    }
+    say('  Adding the demo blog editor and sample posts...');
+    artisan('db:seed', ['--class' => 'Database\\Seeders\\BlogDemoSeeder', '--force' => true]);
+}
+
 function printLogins(): void
 {
     say('');
     say('  Admin login : '.(config('mat.admin.email') ?: '(set ADMIN_EMAIL in .env)'));
     say('  Password    : '.(config('mat.admin.password') ?: '(set ADMIN_PASSWORD in .env, then run start.bat again)'));
     say('  Demo lawyers: demo.lawyer2@example.com, demo.lawyer3@example.com, ... / password');
+    say('  Blog editor : editor@example.com / Editor@12345 (can only manage blog posts)');
     say('  AI spam     : '.(filled(config('mat.spam_ai.api_key')) && config('mat.spam_ai.enabled')
         ? 'on ('.config('mat.spam_ai.model').')'
         : 'off (add ANTHROPIC_API_KEY to .env to turn it on, see README)'));
@@ -178,6 +189,7 @@ switch ($command) {
         }
         artisan('db:seed', ['--force' => true]);   // reference data + admin (idempotent)
         seedDemoIfEmpty();
+        seedBlogDemoIfMissing();
 
         if (! file_exists(public_path('storage'))) {
             artisan('storage:link');
