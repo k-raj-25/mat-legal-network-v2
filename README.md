@@ -4,7 +4,8 @@ The website of MAT LEGAL NETWORK, a law firm, with a directory of verified lawye
 
 - **Clients** search lawyers by state, city, practice area, name, experience, language, court, gender, fee and online consultation. They **never see a lawyer's phone number**. They contact the company instead, by helpline call, WhatsApp, or a callback request.
 - **Lawyers** register with a 5-step form and upload their Bar enrolment proof and ID. Profiles stay **pending until the admin approves them**. After approval, lawyers can edit their profile. Edits go live immediately and are **logged for the admin to review**.
-- **Admin** (the company) approves, rejects with a reason, suspends or reinstates lawyers, views private documents (every view is logged), handles client enquiries and assigns them to lawyers, reviews profile changes, manages the filter lists, edits company contact and legal details, and sees a full audit log.
+- **Admin** (the company) approves, rejects with a reason, suspends or reinstates lawyers, views private documents (every view is logged), handles client enquiries and assigns them to lawyers, reviews profile changes, manages the filter lists, edits company contact and legal details, and sees a full audit log. The admin also runs the **blog** and creates **editor (author) accounts**.
+- **Editors** sign in and manage **only their own blog posts**: write, save drafts, publish, unpublish and delete, with a featured image and a rich text editor. They cannot see lawyers, enquiries, settings or any other part of the admin panel.
 
 Built with **Laravel 13 + MySQL + Blade + Tailwind CSS 4 + Alpine.js**. The design is bold and vibrant, light theme by default: electric teal (primary), coral (accent) and ink, set in Plus Jakarta Sans. Colour tokens live in `resources/css/app.css`, and every text/background pairing meets WCAG AA contrast. It needs no Node.js, Redis or background workers on the server, so it runs on **cheap shared hosting** (cPanel/Hostinger-style).
 
@@ -20,7 +21,8 @@ Built with **Laravel 13 + MySQL + Blade + Tailwind CSS 4 + Alpine.js**. The desi
 | Change log | Every edit is stored as an old → new diff. The admin can mark edits reviewed one by one or all at once. |
 | Legal | Terms of Use, Privacy Policy (DPDP Act 2023), BCI-compliant Disclaimer (with a first-visit popup), Lawyer Listing Terms, Cookie Policy, IP & Copyright Policy, and Grievance Redressal (IT Rules 2021). Company details in these pages are editable from **Admin › Settings**. |
 | Anti-abuse / anti-copying | Rate limits (search 90/min, enquiries 5/hour, login, register, password reset), a honeypot and time-trap on forms, a 100-page cap on deep pagination, robots.txt blocking AI/data crawlers, security headers, and copyright notices. |
-| SEO | Server-rendered pages, clean filter URLs, canonical tags, sitemap.xml, and per-profile meta descriptions. |
+| SEO | Server-rendered pages, clean filter URLs, canonical tags, sitemap.xml, and per-profile meta descriptions. Blog posts have their own SEO title/description, Open Graph tags and `BlogPosting` structured data. |
+| Blog | Public `/blog` (paginated, newest first), category pages and article pages with a legal-information note. Admin and editors write posts in the panel; HTML is cleaned with an allow-list so a post can never run scripts. |
 | Global-ready | Countries table (India active; US, UK, UAE and others seeded but inactive), country-aware phone validation, and currency and bar-body label per country. |
 
 ---
@@ -43,6 +45,8 @@ Next time, double-click `start.bat` again; it skips everything that is already d
 | Admin panel | http://127.0.0.1:8000/admin |
 | Admin login | `admin@example.com` / `Admin@12345` |
 | Demo lawyer logins | `demo.lawyer2@example.com`, `demo.lawyer3@example.com`, … (up to `demo.lawyer61`) / `password` |
+| Demo blog editor login | `editor@example.com` / `Editor@12345` (can only manage blog posts) |
+| Blog | http://127.0.0.1:8000/blog (3 sample posts: 2 published, 1 draft) |
 | E-mails the site "sends" | written to `storage\logs\laravel.log` |
 | Database | `database\database.sqlite` (a single file) |
 
@@ -87,6 +91,32 @@ Every new enquiry can be checked by Claude (Anthropic's AI). Enquiries it is con
 - **Doesn't slow the form.** The check runs on the queue (the cron job on the server). Locally (`start.bat`) it runs just after the page has been sent.
 - **Minimal data.** Only the message text, the practice area and the form type are sent. Name, phone, e-mail, city and IP address are never sent.
 - **Prompt-injection resistant.** The message is passed as escaped data with instructions to never obey it, and the answer must match a strict format. The worst a trick message can do is be treated as a normal enquiry.
+
+---
+
+## Blog and editor accounts
+
+The public blog is at **/blog**, with a category menu, pages of 9 posts (newest first) and one page per article. It is linked from the header, the mobile menu, the footer and `sitemap.xml`. Every article ends with a short note that it is general information, that MAT LEGAL NETWORK is a law firm and gives legal advice when engaged, and a link to the Disclaimer.
+
+**Admin**
+
+- **Admin › Blog posts:** every post by every author. Filter by author or status, search by title, edit, unpublish or delete anything.
+- **Admin › Blog editors:** add an editor (name, email, temporary password), change their details, **reset their password** (signs them out everywhere) and **deactivate** or reactivate them. A deactivated editor cannot sign in; their published posts stay on the blog.
+- **Admin › Blog categories:** add categories or hide them. Seven starter categories are created by `php artisan db:seed`.
+- Every create, edit, publish, unpublish and delete is in the **Audit log**.
+
+**Editors** sign in at `/login` and land on **My blog posts**. They see only their own posts and **My account** (change password). Writing a post:
+
+1. **Title**, optional **web address** (made from the title if empty) and **summary**.
+2. **Article** in the editor: headings, bold, italic, lists, quotes and links. Pasted text arrives as plain text. Without JavaScript the editor falls back to a plain HTML box.
+3. Optional **category**, **featured image** (JPG/PNG/WebP up to 4 MB, needs a description for screen readers) and **SEO title/description**.
+4. **Save draft** (only the author and the admin can see it, with **Preview**) or **Publish**. A live post can be **Updated** or **Unpublished** back to a draft.
+
+**How access is enforced:** the editor role can reach only the `admin/posts*` and `admin/account*` routes (`role:admin,editor` middleware). Everything else under `/admin` stays `role:admin` and returns 403 for editors. On top of that, `app/Policies/PostPolicy.php` lets an editor view, edit, publish or delete **only posts they wrote**, and `app/Policies/UserPolicy.php` keeps editor management with the admin. `tests/Feature/EditorAccessTest.php` walks every admin route and proves editors are refused.
+
+**Safe HTML:** post bodies are cleaned on save by `app/Support/HtmlSanitizer.php` (HTML Purifier with an allow-list: paragraphs, headings, bold/italic, lists, quotes, links and code). Scripts, styles, event handlers, iframes, images in the body and `javascript:` links are removed.
+
+**Demo data:** `php artisan db:seed --class=BlogDemoSeeder` adds the demo editor and 3 sample posts (`start.bat` does this for you once, also on an existing local database). For load testing: `DEMO_POSTS=20000 php artisan db:seed --class=BlogDemoSeeder`.
 
 ---
 
@@ -136,7 +166,7 @@ npm install && npm run build
 
 ## Tests
 
-### 1. Feature & unit tests (110 tests, 1083 assertions)
+### 1. Feature & unit tests (140 tests, 1402 assertions)
 
 They run against a real MySQL database, `mat_legal_test` (see `phpunit.xml`):
 
@@ -168,6 +198,12 @@ QUEUE_CONNECTION=sync
 
 ```bash
 node tests/Browser/spam-e2e.cjs
+```
+
+**Blog and editor accounts (22 checks, desktop + iPhone).** Needs the demo data from `DemoSeeder` (which adds the sample posts) and `php artisan storage:link`.
+
+```bash
+node tests/Browser/blog-e2e.cjs
 ```
 
 ### 3. Scalability
@@ -265,5 +301,9 @@ tests/Feature, tests/Unit              PHPUnit tests
 tests/Browser/e2e.cjs                  Playwright UI tests
 tests/Browser/spam-e2e.cjs             Playwright checks for AI spam screening (fake AI API)
 app/Services/Spam/                     AI spam screening (classifier, fail-open flow)
+app/Services/PostService.php           blog posts: save, publish/unpublish, images, audit
+app/Policies/PostPolicy.php            who may manage which blog post (admin: all, editor: own)
+app/Support/HtmlSanitizer.php          allow-list HTML cleaning for blog posts
+tests/Browser/blog-e2e.cjs             Playwright checks for the blog and editor accounts
 tests/Load/load.cjs                    load test script
 ```

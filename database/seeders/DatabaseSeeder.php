@@ -8,10 +8,10 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /** Production-safe seed: reference data + the admin account (if configured in .env). */
+    /** Production-safe seed: reference data (incl. blog categories) + the admin account (if configured in .env). */
     public function run(): void
     {
-        $this->call([LocationSeeder::class, TaxonomySeeder::class]);
+        $this->call([LocationSeeder::class, TaxonomySeeder::class, BlogCategorySeeder::class]);
 
         if (config('mat.admin.email') && config('mat.admin.password')) {
             $admin = User::firstOrNew(['email' => config('mat.admin.email')]);

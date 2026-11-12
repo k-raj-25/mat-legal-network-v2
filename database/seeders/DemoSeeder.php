@@ -99,5 +99,8 @@ class DemoSeeder extends Seeder
                 DB::table('court_lawyer')->insert($c);
             }
         }
+
+        // Demo blog editor + sample posts.
+        $this->call(BlogDemoSeeder::class);
     }
 }

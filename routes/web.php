@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\LawyerRegistrationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Lawyer;
@@ -27,6 +28,11 @@ Route::post('/enquiries', [EnquiryController::class, 'store'])->middleware('thro
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/for-lawyers', [PageController::class, 'forLawyers'])->name('for-lawyers');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::middleware('throttle:search')->group(function () {
+    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/category/{category:slug}', [BlogController::class, 'index'])->name('blog.category')->where('category', '[a-z0-9\-]+');
+    Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show')->where('post', '[a-z0-9\-]+');
+});
 Route::get('/legal/{page}', [PageController::class, 'legal'])->name('legal');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', fn () => response()->view('robots')->header('Content-Type', 'text/plain'))->name('robots');
@@ -51,6 +57,21 @@ Route::middleware(['auth', 'role:lawyer'])->prefix('lawyer')->name('lawyer.')->g
     Route::put('/profile', [Lawyer\ProfileController::class, 'update'])->name('profile.update');
     Route::put('/password', [Lawyer\ProfileController::class, 'password'])->name('password.update');
     Route::get('/documents/{document}', [Lawyer\ProfileController::class, 'document'])->name('documents.show');
+});
+
+// ---------- Blog management (admin + editors) ----------
+// Editors can reach ONLY these routes (plus their own account page). PostPolicy limits editors to their own posts.
+Route::middleware(['auth', 'role:admin,editor'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/posts', [Admin\PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/create', [Admin\PostController::class, 'create'])->name('posts.create');
+    Route::post('/posts', [Admin\PostController::class, 'store'])->name('posts.store');
+    Route::get('/posts/{post:id}/edit', [Admin\PostController::class, 'edit'])->name('posts.edit');
+    Route::get('/posts/{post:id}/preview', [Admin\PostController::class, 'preview'])->name('posts.preview');
+    Route::put('/posts/{post:id}', [Admin\PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{post:id}', [Admin\PostController::class, 'destroy'])->name('posts.destroy');
+
+    Route::get('/account', [Admin\AccountController::class, 'edit'])->name('account.edit');
+    Route::put('/account/password', [Admin\AccountController::class, 'password'])->name('account.password');
 });
 
 // ---------- Admin panel ----------
@@ -78,6 +99,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/masters/cities', [Admin\TaxonomyController::class, 'storeCity'])->name('masters.cities.store');
     Route::post('/masters/{type}', [Admin\TaxonomyController::class, 'store'])->name('masters.store');
     Route::post('/masters/{type}/{id}/toggle', [Admin\TaxonomyController::class, 'toggle'])->name('masters.toggle');
+
+    Route::get('/blog-categories', [Admin\BlogCategoryController::class, 'index'])->name('blog-categories.index');
+    Route::post('/blog-categories', [Admin\BlogCategoryController::class, 'store'])->name('blog-categories.store');
+    Route::post('/blog-categories/{category}/toggle', [Admin\BlogCategoryController::class, 'toggle'])->name('blog-categories.toggle');
+
+    Route::get('/editors', [Admin\EditorController::class, 'index'])->name('editors.index');
+    Route::get('/editors/create', [Admin\EditorController::class, 'create'])->name('editors.create');
+    Route::post('/editors', [Admin\EditorController::class, 'store'])->name('editors.store');
+    Route::get('/editors/{editor}/edit', [Admin\EditorController::class, 'edit'])->name('editors.edit');
+    Route::put('/editors/{editor}', [Admin\EditorController::class, 'update'])->name('editors.update');
+    Route::put('/editors/{editor}/password', [Admin\EditorController::class, 'password'])->name('editors.password');
+    Route::post('/editors/{editor}/toggle', [Admin\EditorController::class, 'toggle'])->name('editors.toggle');
 
     Route::get('/settings', [Admin\SettingController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [Admin\SettingController::class, 'update'])->name('settings.update');

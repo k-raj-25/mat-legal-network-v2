@@ -6,13 +6,17 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * role:admin            only admins
+ * role:admin,editor     admins or blog editors
+ */
 class EnsureRole
 {
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         $user = $request->user();
 
-        if (! $user || $user->role?->value !== $role) {
+        if (! $user || ! in_array($user->role?->value, $roles, true)) {
             abort(403);
         }
 

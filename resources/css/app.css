@@ -97,6 +97,24 @@
     .prose-legal a { @apply font-semibold text-brand-700 underline decoration-brand-300 decoration-2 underline-offset-2 hover:decoration-brand-600; }
     .prose-legal strong { @apply text-ink; }
 
+    /* Blog articles (also used inside the editor so authors see what readers will see). */
+    .prose-blog { @apply text-[17px] leading-8 break-words text-slate-700; }
+    .prose-blog > :first-child { @apply mt-0; }
+    .prose-blog h2 { @apply mt-12 mb-4 text-2xl leading-tight sm:text-3xl; }
+    .prose-blog h3 { @apply mt-8 mb-3 text-xl leading-snug; }
+    .prose-blog h4 { @apply mt-6 mb-2 text-lg font-bold text-ink; }
+    .prose-blog p { @apply my-5; }
+    .prose-blog ul { @apply my-5 list-disc space-y-2 pl-6 marker:text-brand-500; }
+    .prose-blog ol { @apply my-5 list-decimal space-y-2 pl-6 marker:font-bold marker:text-brand-600; }
+    .prose-blog blockquote { @apply my-8 rounded-r-2xl border-l-4 border-coral-500 bg-coral-50 px-5 py-4 text-lg font-medium text-ink; }
+    .prose-blog blockquote p { @apply my-0; }
+    .prose-blog a { @apply font-semibold text-brand-700 underline decoration-brand-300 decoration-2 underline-offset-2 hover:decoration-brand-600; }
+    .prose-blog strong, .prose-blog b { @apply font-bold text-ink; }
+    .prose-blog hr { @apply my-10 border-slate-200; }
+    .prose-blog code { @apply rounded bg-slate-100 px-1.5 py-0.5 text-[0.9em] text-ink; }
+    .prose-blog pre { @apply my-6 overflow-x-auto rounded-2xl bg-ink p-4 text-sm text-slate-100; }
+    .prose-blog pre code { @apply bg-transparent p-0 text-inherit; }
+
     .admin-table { @apply min-w-full divide-y divide-slate-100 text-sm; }
     .admin-table th { @apply bg-slate-50/80 px-4 py-3 text-left text-[11px] font-bold tracking-wider text-slate-500 uppercase; }
     .admin-table td { @apply px-4 py-3.5 align-top; }
