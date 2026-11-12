@@ -166,7 +166,7 @@ npm install && npm run build
 
 ## Tests
 
-### 1. Feature & unit tests (110 tests, 1083 assertions)
+### 1. Feature & unit tests (140 tests, 1402 assertions)
 
 They run against a real MySQL database, `mat_legal_test` (see `phpunit.xml`):
 
@@ -198,6 +198,12 @@ QUEUE_CONNECTION=sync
 
 ```bash
 node tests/Browser/spam-e2e.cjs
+```
+
+**Blog and editor accounts (22 checks, desktop + iPhone).** Needs the demo data from `DemoSeeder` (which adds the sample posts) and `php artisan storage:link`.
+
+```bash
+node tests/Browser/blog-e2e.cjs
 ```
 
 ### 3. Scalability
