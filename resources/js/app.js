@@ -79,7 +79,20 @@ Alpine.data('wizard', (steps, startAt = 0) => ({
     },
     prev() { if (this.step > 0) { this.step--; this.scrollTop(); } },
     go(i) { if (i < this.step) { this.step = i; this.scrollTop(); } },
-    scrollTop() { this.$nextTick(() => this.$root.scrollIntoView({ behavior: 'smooth', block: 'start' })); },
+    // Bring the top of the form back into view after a step change, but only
+    // scroll *up*: if the form's top is already visible (e.g. the page is still
+    // at the top), stay put instead of jumping down past the page title. Land
+    // just below the sticky site header so the progress bar isn't hidden.
+    scrollTop() {
+        this.$nextTick(() => {
+            const header = document.querySelector('body > header');
+            const offset = (header && getComputedStyle(header).position === 'sticky' ? header.offsetHeight : 0) + 16;
+            const top = this.$root.getBoundingClientRect().top;
+            if (top >= offset) return;
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({ top: Math.max(0, window.scrollY + top - offset), behavior: reduce ? 'auto' : 'smooth' });
+        });
+    },
 }));
 
 /** Searchable multi-select of checkboxes with a max count. */
