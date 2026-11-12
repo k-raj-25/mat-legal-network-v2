@@ -97,6 +97,46 @@ class AdminTest extends TestCase
         $this->get('/admin/lawyers/'.$live->slug)->assertSee('Complaint received');
     }
 
+    public function test_request_changes_never_reads_as_rejected(): void
+    {
+        Notification::fake();
+        $admin = $this->admin();
+        $l = $this->lawyer(LawyerStatus::Pending);
+
+        $this->actingAs($admin)->post("/admin/lawyers/{$l->slug}/status", ['action' => 'reject', 'reason' => 'Please upload a clearer pic']);
+        // Stored code is unchanged so existing rows and reports keep working.
+        $this->assertDatabaseHas('audit_logs', ['action' => 'lawyer.rejected', 'subject_id' => $l->id]);
+
+        $page = $this->get('/admin/lawyers/'.$l->slug)->assertOk()
+            ->assertSee('Changes requested')->assertSee('Please upload a clearer pic');
+        $this->assertStringNotContainsString('Rejected', $page->getContent());
+
+        $audit = $this->get('/admin/audit-log')->assertOk()->assertSee('Changes requested')->assertSee('to: Changes requested');
+        $this->assertStringNotContainsString('Rejected', $audit->getContent());
+        $this->assertStringNotContainsString("to: 'rejected'", $audit->getContent());
+
+        $this->get('/admin/lawyers?status=rejected')->assertOk()->assertSee('Changes requested')->assertDontSee('Rejected');
+
+        auth()->logout();
+        $this->actingAs($l->user)->get('/lawyer')->assertOk()->assertSee('Changes requested')->assertSee('Please upload a clearer pic')->assertDontSee('Rejected');
+        $this->get('/lawyer/profile')->assertOk()->assertSee('Changes requested')->assertDontSee('Rejected');
+    }
+
+    public function test_audit_labels_cover_every_review_action(): void
+    {
+        $label = fn (string $action, array $meta = []) => (new AuditLog(['action' => $action, 'meta' => $meta]))->label();
+
+        $this->assertSame('Changes requested', $label('lawyer.rejected', ['from' => 'pending', 'to' => 'rejected']));
+        $this->assertSame('Approved', $label('lawyer.approved', ['from' => 'pending', 'to' => 'approved']));
+        $this->assertSame('Approved', $label('lawyer.approved', ['from' => 'rejected', 'to' => 'approved']));
+        $this->assertSame('Reinstated', $label('lawyer.approved', ['from' => 'suspended', 'to' => 'approved']));
+        $this->assertSame('Suspended', $label('lawyer.suspended'));
+        $this->assertSame('Document viewed', $label('document.viewed'));
+        $this->assertSame('Something new', $label('lawyer.something_new'));
+        // Enquiry status values are not lawyer statuses and must be left alone.
+        $this->assertSame("status: 'closed'", (new AuditLog(['action' => 'enquiry.updated', 'meta' => ['status' => 'closed']]))->metaSummary());
+    }
+
     public function test_invalid_action_is_rejected(): void
     {
         $l = $this->lawyer(LawyerStatus::Pending);

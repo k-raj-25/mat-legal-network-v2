@@ -3,7 +3,7 @@
     @if ($lawyer->status === LawyerStatus::Approved)
         <p class="mb-6 flex gap-3 rounded-2xl bg-brand-50 px-4 py-3.5 text-sm font-semibold text-brand-800 ring-1 ring-brand-200"><x-icon name="bolt" class="size-5 shrink-0"/>Changes go live immediately. For quality and safety, every change is recorded and visible to the MAT team.</p>
     @elseif ($lawyer->status === LawyerStatus::Rejected)
-        <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"><strong>Changes requested:</strong> {{ $lawyer->status_reason }}</div>
+        <div class="mb-6 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-900"><strong>Changes requested:</strong> {{ $lawyer->status_reason }}</div>
     @endif
 
     <form method="POST" action="{{ route('lawyer.profile.update') }}" enctype="multipart/form-data" class="space-y-6" data-testid="profile-form">
