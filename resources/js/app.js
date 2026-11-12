@@ -3,6 +3,28 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 
 /**
+ * Clickable table rows: <tr data-row-href="..."> opens the URL when clicked anywhere
+ * that is not already an interactive control. Ctrl/Cmd/Shift or middle click opens a
+ * new tab, and selecting text does not navigate. Keyboard users use the row's own link.
+ */
+function rowTarget(e) {
+    const row = e.target.closest('tr[data-row-href]');
+    if (!row || e.target.closest('a, button, input, select, textarea, label, summary, [role="button"]')) return null;
+    if (String(window.getSelection?.() ?? '').length) return null;
+    return row;
+}
+document.addEventListener('click', (e) => {
+    const row = e.button === 0 ? rowTarget(e) : null;
+    if (!row) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey) window.open(row.dataset.rowHref, '_blank', 'noopener');
+    else window.location.assign(row.dataset.rowHref);
+});
+document.addEventListener('auxclick', (e) => {
+    const row = e.button === 1 ? rowTarget(e) : null;
+    if (row) window.open(row.dataset.rowHref, '_blank', 'noopener');
+});
+
+/**
  * Dependent State -> City dropdown.
  * Usage: x-data="cityPicker({ url: '/locations/:state/cities', state: '..', city: '..', key: 'id'|'slug' })"
  */
