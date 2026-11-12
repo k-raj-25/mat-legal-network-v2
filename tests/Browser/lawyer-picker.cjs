@@ -147,7 +147,7 @@ async function run(label, ctxOpts, enquiryId, otherCode) {
 
   // Tab from a typed search picks the highlighted match and moves on.
   await input.fill('');
-  await input.pressSequentially('priya', { delay: 30 });
+  await input.pressSequentially('priya sharma', { delay: 30 });
   await page.waitForTimeout(500);
   await page.keyboard.press('Tab');
   check(`${P} Tab accepts highlighted match`, (await hidden.inputValue()) === priyaCode);
