@@ -5,8 +5,9 @@
 
 <h2>1. What the Platform is</h2>
 <ol>
-    <li>The Platform is an online directory that lets members of the public (“<strong>Users</strong>”) search for information voluntarily provided by advocates (“<strong>Lawyers</strong>”), and request that our team put them in touch with a Lawyer.</li>
-    <li><strong>We are not a law firm and do not provide legal advice or legal services.</strong> No advocate–client relationship is created between you and us by using the Platform. Any professional engagement, advice, fee or arrangement is solely between you and the Lawyer you choose.</li>
+    <li>The Platform is the website of {{ $co }}, a law firm. It includes an online directory that lets members of the public (“<strong>Users</strong>”) search for information voluntarily provided by advocates (“<strong>Lawyers</strong>”), and request that our team put them in touch with a Lawyer.</li>
+    <li><strong>We are a law firm and give legal advice and legal services through our own advocates.</strong> Using the Platform, reading its content or submitting an enquiry does not by itself create an advocate–client relationship between you and us. That relationship arises only when you engage us for a specific matter and we agree to act for you, on terms agreed with you.</li>
+    <li>Lawyers listed on the Platform are independent of us. Any professional engagement, advice, fee or arrangement with a Lawyer you choose is solely between you and that Lawyer.</li>
     <li>We do not recommend, endorse, rank by merit or guarantee any Lawyer or outcome. Order of display may depend on search filters, recency or other neutral factors.</li>
     <li>To protect privacy, Lawyers’ personal contact details are not displayed. Users contact us using the details on the Platform, and we pass the request to the relevant Lawyer.</li>
 </ol>
@@ -30,9 +31,9 @@
 
 <h2>4. Enquiries and callback requests</h2>
 <ol>
-    <li>When you submit an enquiry, call or message us, you authorise us to contact you and to share the details you provide with one or more Lawyers for the purpose of responding to your request, as described in our Privacy Policy.</li>
-    <li>Please do not send confidential documents or sensitive details of your matter through the Platform. Share them only with the Lawyer you engage.</li>
-    <li>We will try to respond promptly but do not guarantee that a particular Lawyer will be available, will accept your matter, or will respond within any time.</li>
+    <li>When you submit an enquiry, call or message us, you authorise us to contact you and to share the details you provide with our own advocates or with one or more Lawyers for the purpose of responding to your request, as described in our Privacy Policy.</li>
+    <li>Please do not send confidential documents or sensitive details of your matter through the Platform’s forms. Share them only with the advocate handling your matter, whether that is us or a Lawyer you engage.</li>
+    <li>We will try to respond promptly but do not guarantee that we or a particular Lawyer will be available, will accept your matter, or will respond within any time.</li>
     <li>Do not rely on the Platform for urgent matters or where limitation periods are about to expire. Contact a Lawyer or the appropriate authority directly.</li>
 </ol>
 
@@ -49,7 +50,7 @@
 <p>The Platform is provided on an “as is” and “as available” basis. To the maximum extent permitted by law, we disclaim all warranties, express or implied, including fitness for a particular purpose, non-infringement, accuracy and uninterrupted availability.</p>
 
 <h2>9. Limitation of liability</h2>
-<p>To the maximum extent permitted by law, we, our directors, employees and agents will not be liable for any indirect, incidental, special, consequential or punitive loss, or for any loss arising from advice, services, acts or omissions of any Lawyer, or from your reliance on any content on the Platform. Our total aggregate liability for any claim relating to the Platform shall not exceed ₹1,000 (Rupees One Thousand), considering the Platform is provided free of charge.</p>
+<p>To the maximum extent permitted by law, we, our directors, employees and agents will not be liable for any indirect, incidental, special, consequential or punitive loss, or for any loss arising from advice, services, acts or omissions of any Lawyer, or from your reliance on any content on the Platform. Our total aggregate liability for any claim relating to the Platform shall not exceed ₹1,000 (Rupees One Thousand), considering the Platform is provided free of charge. This section applies to your use of the Platform; legal services that we provide to you are governed by the terms of our engagement with you.</p>
 
 <h2>10. Indemnity</h2>
 <p>You agree to indemnify and hold us harmless from any claim, loss, liability, damage and expense (including reasonable legal fees) arising out of your breach of these Terms, misuse of the Platform, or violation of any law or the rights of any third party.</p>

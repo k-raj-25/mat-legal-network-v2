@@ -16,9 +16,9 @@ class LegalAndSecurityTest extends TestCase
     public function test_all_legal_pages_render_with_key_clauses(): void
     {
         $expect = [
-            'terms' => ['not a law firm', 'scraper', 'Copyright Act, 1957', 'Sections 43 and 66', 'exclusive jurisdiction'],
+            'terms' => ['We are a law firm and give legal advice', 'Lawyers listed on the Platform are independent of us', 'terms of our engagement with you', 'scraper', 'Copyright Act, 1957', 'Sections 43 and 66', 'exclusive jurisdiction'],
             'privacy' => ['Digital Personal Data Protection Act, 2023', 'Data Fiduciary', 'never displayed publicly', 'withdraw consent', 'Grievance Officer'],
-            'disclaimer' => ['Rule 36', 'not</strong> an advertisement', 'no advertisement, personal communication, solicitation'],
+            'disclaimer' => ['Rule 36', 'not</strong> an advertisement', 'no advertisement, personal communication, solicitation', 'is a law firm and gives legal advice', 'not partners or employees'],
             'lawyer-terms' => ['State Bar Council', 'free of charge', 'confidential personal data', 'Rule 36'],
             'cookies' => ['strictly necessary', 'XSRF-TOKEN', 'mln_disclaimer'],
             'intellectual-property' => ['Trade Marks Act, 1999', 'Section 2(o)', 'Section 63', 'train any competing'],
@@ -56,6 +56,28 @@ class LegalAndSecurityTest extends TestCase
             $res->assertSee(route('legal', $page), false);
         }
         $res->assertSee('All rights reserved')->assertSee('Unauthorised copying, scraping or reproduction is prohibited');
+    }
+
+    public function test_site_copy_says_mat_is_a_law_firm_that_gives_legal_advice(): void
+    {
+        $lawyer = $this->lawyer();
+        $urls = ['/', '/about', '/contact', '/for-lawyers', '/lawyers', '/lawyers/'.$lawyer->slug, '/register', '/login'];
+        foreach (array_keys(PageController::LEGAL) as $page) {
+            $urls[] = '/legal/'.$page;
+        }
+        foreach ($urls as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+            foreach (['not a law firm', 'does not provide legal advice', 'do not give legal advice', 'does not give legal advice', 'do not provide legal advice', 'does not practise law', 'information and connection platform'] as $old) {
+                $this->assertStringNotContainsStringIgnoringCase($old, $html, "Old wording \"$old\" still on $url");
+            }
+        }
+
+        // Footer on every public page, the popup on pages that show it, and the About page.
+        $this->get('/')->assertSee('MAT LEGAL NETWORK is a law firm. Advocates listed in the directory practise independently')
+            ->assertSee('is a law firm and gives legal advice only when you engage it for your matter', false);
+        $this->get('/about')->assertSee('MAT LEGAL NETWORK is a law firm. Our own advocates give legal advice')
+            ->assertSee('MAT LEGAL NETWORK is a law firm that also helps people across India', false);
+        $this->get('/legal/privacy')->assertSee('advise you where you engage us for your matter');
     }
 
     public function test_static_pages(): void

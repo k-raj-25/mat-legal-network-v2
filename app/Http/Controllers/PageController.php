@@ -39,6 +39,6 @@ class PageController extends Controller
     {
         abort_unless(array_key_exists($page, self::LEGAL), 404);
 
-        return view('legal.'.$page, ['title' => self::LEGAL[$page], 'page' => $page, 'updated' => '11 November 2026']);
+        return view('legal.'.$page, ['title' => self::LEGAL[$page], 'page' => $page, 'updated' => '12 November 2026']);
     }
 }
