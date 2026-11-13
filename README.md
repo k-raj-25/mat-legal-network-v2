@@ -164,9 +164,13 @@ npm install && npm run build
 
 ---
 
+## Images
+
+The site's illustrations are original artwork in the brand colours, so there is nothing to licence. They live in `public/images/illustrations/` as small SVG files (about 135 KB for all 23, 26 KB gzipped) and are placed with `<x-art name="..."/>`, which sets the size, lazy loading and alt text. Blog posts without an uploaded image get a cover that matches their category (`blog-<category-slug>.svg`, falling back to `blog-default.svg`). To change or add artwork, edit `scripts/illustrations/build.py` and run `python3 scripts/illustrations/build.py`.
+
 ## Tests
 
-### 1. Feature & unit tests (140 tests, 1402 assertions)
+### 1. Feature & unit tests (141 tests)
 
 They run against a real MySQL database, `mat_legal_test` (see `phpunit.xml`):
 

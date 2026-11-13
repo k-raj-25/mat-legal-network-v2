@@ -61,6 +61,23 @@ class BlogTest extends TestCase
         $this->get('/blog?page='.(Post::MAX_PAGE + 1))->assertNotFound();
     }
 
+    public function test_posts_without_an_image_get_an_illustrated_cover(): void
+    {
+        $known = BlogCategory::firstOrCreate(['slug' => 'criminal-law'], ['name' => 'Criminal law']);
+        $other = BlogCategory::create(['name' => 'Something new', 'slug' => 'something-new']);
+        $this->article(['title' => 'Bail basics explained', 'blog_category_id' => $known->id]);
+        $post = $this->article(['title' => 'A brand new topic', 'blog_category_id' => $other->id]);
+
+        $this->get('/blog')->assertOk()
+            ->assertSee('images/illustrations/blog-criminal-law.svg')
+            ->assertSee('images/illustrations/blog-default.svg');
+        $this->get('/blog/'.$post->slug)->assertOk()->assertSee('images/illustrations/blog-default.svg');
+
+        foreach (['hero-about', 'hero-for-lawyers', 'hero-contact', 'step-search', 'city-skyline', 'auth-login', 'error-scales', 'blog-default'] as $name) {
+            $this->assertFileExists(public_path("images/illustrations/{$name}.svg"));
+        }
+    }
+
     public function test_empty_blog_shows_a_friendly_message(): void
     {
         $this->get('/blog')->assertOk()->assertSee('No articles here yet');

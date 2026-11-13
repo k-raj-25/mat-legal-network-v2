@@ -137,11 +137,12 @@
             <h2 class="mt-2 max-w-2xl text-4xl text-white sm:text-5xl">Three steps. Zero spam calls.</h2>
             <ol class="mt-12 grid gap-5 md:grid-cols-3">
                 @foreach ([
-                    ['search', 'Search & compare', 'Filter verified advocates by city, practice area, court, language and experience.', 'bg-brand-400 text-ink'],
-                    ['phone', 'Call or message MAT', 'Call our helpline, WhatsApp us, or request a callback quoting the lawyer\'s Profile ID.', 'bg-coral-400 text-ink'],
-                    ['users', 'Get connected', 'We confirm availability and connect you with the lawyer – your number stays private.', 'bg-amber-300 text-ink'],
-                ] as $i => [$icon, $t, $d, $tone])
+                    ['search', 'Search & compare', 'Filter verified advocates by city, practice area, court, language and experience.', 'bg-brand-400 text-ink', 'step-search'],
+                    ['phone', 'Call or message MAT', 'Call our helpline, WhatsApp us, or request a callback quoting the lawyer\'s Profile ID.', 'bg-coral-400 text-ink', 'step-call'],
+                    ['users', 'Get connected', 'We confirm availability and connect you with the lawyer – your number stays private.', 'bg-amber-300 text-ink', 'step-connect'],
+                ] as $i => [$icon, $t, $d, $tone, $art])
                     <li class="rounded-3xl bg-white/[0.06] p-7 ring-1 ring-white/10 backdrop-blur">
+                        <x-art :name="$art" class="mb-6 h-auto w-full rounded-2xl"/>
                         <div class="flex items-center justify-between">
                             <span class="tile size-14 {{ $tone }}"><x-icon :name="$icon" class="size-7"/></span>
                             <span class="font-display text-6xl font-extrabold text-white/10">0{{ $i + 1 }}</span>
@@ -171,6 +172,7 @@
 
     @if ($topCities->isNotEmpty())
         <section class="container-page {{ $featured->isEmpty() ? 'pt-20' : '' }}">
+            <x-art name="city-skyline" class="mb-8 h-auto w-full"/>
             <h2 class="text-3xl">Popular cities</h2>
             <div class="mt-6 flex flex-wrap gap-2.5">
                 @foreach ($topCities as $c)
@@ -185,18 +187,18 @@
     {{-- ============ CTA ============ --}}
     <section class="container-page mt-20 grid gap-5 lg:grid-cols-2">
         <div class="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-brand-500 to-brand-700 p-8 text-white sm:p-12">
-            <div class="pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full bg-white/10"></div>
+            <x-art name="cta-help" class="pointer-events-none absolute top-6 right-6 hidden size-40 sm:block"/>
             <span class="tile size-14 bg-white/15"><x-icon name="chat" class="size-7"/></span>
-            <h2 class="mt-6 text-3xl text-white sm:text-4xl">Not sure who to pick?</h2>
-            <p class="mt-3 max-w-md text-lg text-brand-50">Tell us your problem. Our team will suggest verified lawyers near you – free.</p>
-            <x-contact-buttons class="mt-8" on-dark/>
+            <h2 class="relative mt-6 text-3xl text-white sm:text-4xl">Not sure who to pick?</h2>
+            <p class="relative mt-3 max-w-md text-lg text-brand-50">Tell us your problem. Our team will suggest verified lawyers near you – free.</p>
+            <x-contact-buttons class="relative mt-8" on-dark/>
         </div>
         <div class="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-coral-400 to-coral-600 p-8 text-white sm:p-12">
-            <div class="pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full bg-white/10"></div>
+            <x-art name="cta-advocate" class="pointer-events-none absolute top-6 right-6 hidden size-40 sm:block"/>
             <span class="tile size-14 bg-white/15"><x-icon name="briefcase" class="size-7"/></span>
-            <h2 class="mt-6 text-3xl text-white sm:text-4xl">Are you an advocate?</h2>
-            <p class="mt-3 max-w-md text-lg text-coral-50">Listing is <strong>100% free</strong>. Get a verified profile and receive client enquiries through MAT.</p>
-            <a href="{{ route('register') }}" class="btn mt-8 bg-white px-6 py-3 text-base text-coral-700 hover:-translate-y-0.5 hover:bg-coral-50">Join the network <x-icon name="arrow-right" class="size-5"/></a>
+            <h2 class="relative mt-6 text-3xl text-white sm:text-4xl">Are you an advocate?</h2>
+            <p class="relative mt-3 max-w-md text-lg text-coral-50">Listing is <strong>100% free</strong>. Get a verified profile and receive client enquiries through MAT.</p>
+            <a href="{{ route('register') }}" class="btn relative mt-8 bg-white px-6 py-3 text-base text-coral-700 hover:-translate-y-0.5 hover:bg-coral-50">Join the network <x-icon name="arrow-right" class="size-5"/></a>
         </div>
     </section>
 </x-layouts.app>

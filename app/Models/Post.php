@@ -78,6 +78,15 @@ class Post extends Model
         return $this->featured_image_path ? Storage::disk('public')->url($this->featured_image_path) : null;
     }
 
+    /** Illustrated cover shown when a post has no uploaded image: one per seeded category, plus a general one. */
+    public function coverArtUrl(): string
+    {
+        $slug = $this->category?->slug;
+        $name = $slug && is_file(public_path("images/illustrations/blog-{$slug}.svg")) ? "blog-{$slug}" : 'blog-default';
+
+        return asset("images/illustrations/{$name}.svg");
+    }
+
     /** Excerpt for cards and meta tags: the written one, or the start of the article. */
     public function summary(int $limit = 160): string
     {

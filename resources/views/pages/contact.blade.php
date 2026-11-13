@@ -1,5 +1,5 @@
 <x-layouts.app title="Contact Us" description="Call, WhatsApp or write to MAT LEGAL NETWORK. Tell us your legal problem and we'll connect you with a suitable verified lawyer.">
-    <x-page-hero eyebrow="We're here to help" title="Talk to our team" lead="Tell us what you need help with and we'll suggest verified lawyers near you."/>
+    <x-page-hero eyebrow="We're here to help" title="Talk to our team" lead="Tell us what you need help with and we'll suggest verified lawyers near you." image="hero-contact" image-alt="Illustration of a phone chat with the MAT team, with call, WhatsApp and email options"/>
     <section class="container-page grid grid-cols-1 gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div class="space-y-4">
             <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-brand-500 to-brand-700 p-7 text-white">

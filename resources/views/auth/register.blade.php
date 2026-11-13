@@ -11,7 +11,7 @@
     foreach ($errors->keys() as $k) { $start = min($start, $fieldStep[explode('.', $k)[0]] ?? 4); }
     if (! $errors->any()) { $start = 0; }
 @endphp
-<x-layouts.auth title="Join MAT LEGAL NETWORK" subtitle="Free listing for advocates. Your profile goes live after our team verifies your details." wide>
+<x-layouts.auth title="Join MAT LEGAL NETWORK" subtitle="Free listing for advocates. Your profile goes live after our team verifies your details." wide art="auth-join">
     <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="card overflow-hidden rounded-[32px] shadow-pop-lg" x-data="wizard(@js($steps), {{ $start }})" data-testid="register-form" @submit="$refs.submit.disabled = true">
         @csrf
         {{-- Progress --}}
