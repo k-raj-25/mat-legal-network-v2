@@ -72,6 +72,10 @@
                 <figure class="overflow-hidden rounded-[28px] bg-slate-100 shadow-pop">
                     <img src="{{ $post->imageUrl() }}" alt="{{ $post->featured_image_alt }}" class="aspect-[16/9] w-full object-cover" fetchpriority="high" decoding="async">
                 </figure>
+            @else
+                <figure class="overflow-hidden rounded-[28px] bg-slate-100 shadow-pop">
+                    <img src="{{ $post->coverArtUrl() }}" alt="" aria-hidden="true" width="800" height="450" class="aspect-[16/9] w-full object-cover" fetchpriority="high" decoding="async" data-testid="post-cover-art">
+                </figure>
             @endif
 
             <div class="prose-blog mx-auto mt-10 max-w-3xl" data-testid="post-body">

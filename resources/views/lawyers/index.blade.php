@@ -22,7 +22,8 @@
             <div class="absolute -top-24 -left-24 size-80 rounded-full bg-brand-300/35 blur-3xl"></div>
             <div class="absolute -top-24 right-0 size-80 rounded-full bg-coral-300/30 blur-3xl"></div>
         </div>
-        <div class="container-page pt-6 pb-8 sm:pt-10">
+        <div class="container-page relative pt-6 pb-8 sm:pt-10">
+            <x-art name="find-lawyer" eager class="pointer-events-none absolute right-8 bottom-0 hidden h-44 w-auto lg:block"/>
             <nav class="flex items-center gap-1.5 text-xs font-semibold text-slate-500" aria-label="Breadcrumb"><a href="{{ route('home') }}" class="hover:text-ink">Home</a> <x-icon name="chevron-right" class="size-3"/> <span class="text-ink">Find a lawyer</span></nav>
             <h1 class="mt-3 text-4xl sm:text-5xl" data-testid="results-heading">{{ $heading }}</h1>
             <p class="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-sm font-bold text-ink shadow-pop ring-1 ring-slate-200/70"><span class="size-2 rounded-full bg-brand-500"></span><span data-testid="results-count">{{ number_format($lawyers->total()) }}</span> verified {{ Str::plural('lawyer', $lawyers->total()) }} found</p>
@@ -155,8 +156,8 @@
 
                 @if ($lawyers->isEmpty())
                     <div class="card mt-6 px-6 py-16 text-center" data-testid="empty-state">
-                        <span class="tile mx-auto size-16 -rotate-6 bg-coral-100 text-coral-600"><x-icon name="search" class="size-8"/></span>
-                        <h2 class="mt-5 text-2xl">No lawyers match these filters yet</h2>
+                        <x-art name="empty-search" class="mx-auto h-44 w-auto"/>
+                        <h2 class="mt-3 text-2xl">No lawyers match these filters yet</h2>
                         <p class="mx-auto mt-2 max-w-md text-slate-600">Try removing a filter or searching a nearby city. Or call us – our team can often find the right lawyer even when they are not listed here yet.</p>
                         <div class="mt-6 flex flex-col items-center gap-3">
                             <a href="{{ route('lawyers.index') }}" class="btn-outline">Clear filters</a>

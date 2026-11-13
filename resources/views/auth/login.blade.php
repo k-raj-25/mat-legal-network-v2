@@ -1,4 +1,4 @@
-<x-layouts.auth title="Log in" subtitle="For registered lawyers and the MAT team.">
+<x-layouts.auth title="Log in" subtitle="For registered lawyers and the MAT team." art="auth-login">
     <div class="card rounded-[28px] p-6 shadow-pop-lg sm:p-8">
         <x-flash/>
         <form method="POST" action="{{ route('login') }}" class="space-y-5" data-testid="login-form">

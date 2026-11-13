@@ -5,9 +5,7 @@
         @if ($post->featured_image_path)
             <img src="{{ $post->imageUrl() }}" alt="{{ $post->featured_image_alt }}" loading="{{ $lead ? 'eager' : 'lazy' }}" decoding="async" class="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.03]">
         @else
-            <div class="dot-grid absolute inset-0 opacity-40 mix-blend-overlay"></div>
-            <div class="absolute -right-8 -bottom-10 size-40 rounded-full bg-white/15"></div>
-            <x-icon name="scale" class="absolute top-1/2 left-1/2 size-16 -translate-x-1/2 -translate-y-1/2 text-white/80"/>
+            <img src="{{ $post->coverArtUrl() }}" alt="" aria-hidden="true" width="800" height="450" loading="{{ $lead ? 'eager' : 'lazy' }}" decoding="async" class="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.03]" data-testid="post-cover-art">
         @endif
     </div>
     <div class="flex flex-1 flex-col p-5 sm:p-6 {{ $lead ? 'lg:justify-center lg:p-10' : '' }}">

@@ -1,6 +1,6 @@
 <x-layouts.app title="For Lawyers – Join Free" description="Advocates: create a free, verified MAT LEGAL NETWORK profile and receive client enquiries without exposing your personal number.">
-    <x-page-hero eyebrow="For advocates · Free listing" title="Be found by clients who need you." lead="Create a free verified profile. Clients discover you by city, practice area and language – and our team passes on genuine enquiries. Your personal number stays private." tone="coral">
-        <div class="mt-8 flex flex-wrap justify-center gap-3">
+    <x-page-hero eyebrow="For advocates · Free listing" title="Be found by clients who need you." lead="Create a free verified profile. Clients discover you by city, practice area and language – and our team passes on genuine enquiries. Your personal number stays private." tone="coral" image="hero-for-lawyers" image-alt="Illustration of a verified advocate profile with a new client enquiry and a privacy lock">
+        <div class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
             <a href="{{ route('register') }}" class="btn-accent px-7 py-3.5 text-base">Register free <x-icon name="arrow-right" class="size-5"/></a>
             <a href="{{ route('login') }}" class="btn-outline px-7 py-3.5 text-base">Lawyer log in</a>
         </div>
